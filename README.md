@@ -10,12 +10,9 @@ Members
    * Obeth
    * Jackson
    * Aung
-Client
-FWCS Career Academy cosmetology classes
-
 
 Purpose
-Create a punch card system for the cosmetology program
+Create a punch card system for users to track how many hours they worked
 
 
 Scope
