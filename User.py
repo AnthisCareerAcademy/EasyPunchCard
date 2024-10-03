@@ -7,6 +7,14 @@ class User:
         self.current_hours = current_hours
         self.last_clock_action = last_clock_action
 
+    def clock_in(self):
+        """Set the user to clock in"""
+        pass
+
+    def clock_out(self):
+        """Set the user to clock out"""
+        pass
+
     
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} with Unique ID {self.unique_id} has {self.current_hours} hrs and their last clock action was {self.last_clock_action}"
