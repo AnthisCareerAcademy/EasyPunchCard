@@ -2,14 +2,35 @@ import sqlite3
 
 class SqlAccess:
     """alskdfjlkasjf"""
-    def __init__(self, admin_status):
+    def __init__(self, student_id:str, admin_status:int=None):
         self.create_table()
-        self.admin_status = admin_status
+        self.student_id = student_id
+        self.exists = self.user_exists()
+        if self.exists:
+            conn = self.get_db()
+            cursor = conn.cursor()
+            cursor.execute(f"SELECT admin_status FROM all_users WHERE student_id='{self.student_id}'")
+            self.admin_status = cursor.fetchone()[0]
+        else:
+            if admin_status in [0, 1]:
+                self.admin_status = admin_status
+            else:
+                raise ValueError("User does not exist and no correct data provided for admin_status")
+        
+        
 
     @staticmethod
     def get_db():
         conn = sqlite3.connect('EasyPunchCard.db')
         return conn
+    
+    def user_exists(self):
+        conn = self.get_db()
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id='{self.student_id}')")
+        exists = cursor.fetchone()[0]
+        return exists
+
 
     def create_table(self):
         conn = self.get_db()
@@ -27,17 +48,17 @@ class SqlAccess:
         conn.close()
 
 
-    def add_self(self, student_id:str, username:str):
+    def add_self(self, username:str):
         conn = self.get_db()
         cursor = conn.cursor()
         # Add user into main table
         cursor.execute(f'''
                         INSERT INTO all_users(student_id, username, admin_status, total_minutes)
-                        VALUES('{student_id}', '{username}', {self.admin_status}, 0)
+                        VALUES('{self.student_id}', '{username}', {self.admin_status}, 0)
                         ''')
         # create table for user
         cursor.execute(f'''
-                        CREATE TABLE IF NOT EXISTS user_{student_id} (
+                        CREATE TABLE IF NOT EXISTS user_{self.student_id} (
                         student_id TEXT,
                         date TEXT,
                         start_time TEXT,
@@ -52,7 +73,7 @@ class SqlAccess:
         conn.close()
 
 
-    def update_time(self, student_id:str, additional_minutes:int):
+    def update_time(self, additional_minutes:int):
         """
         conn = self.get_db()
         get cursor
@@ -76,15 +97,15 @@ class SqlAccess:
     def read_all_users(self):
         # admin check doesn't work
         if self.admin_status == 0:
-            return
+            return "user doesn't have admin status"
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
         return cursor.fetchall()
     
-    def read_user_table(self, student_id: str):
+    def read_user_table(self, student_id):
         if self.admin_status == 0:
-            return
+            return "user doesn't have admin status"
         conn = self.get_db()
         cursor = conn.cursor()
         try:
