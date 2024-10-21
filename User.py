@@ -14,14 +14,10 @@ class User:
             # if there is data use the data to create another user
             if data is not None:
                 self.access.add_self(data["username"])
-
-        
-
-        # else raise error because no data was provided to create user
-
     
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} with Unique ID {self.unique_id}"
+
 
 data = {"username": "AungAung", "admin_status": 1}
 admin = User("1234", data)
