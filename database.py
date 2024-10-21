@@ -7,10 +7,13 @@ class SqlAccess:
         self.student_id = student_id
         self.exists = self.user_exists()
         if self.exists:
+            # check if user exists
             conn = self.get_db()
             cursor = conn.cursor()
             cursor.execute(f"SELECT admin_status FROM all_users WHERE student_id='{self.student_id}'")
             self.admin_status = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
         else:
             if admin_status in [0, 1]:
                 self.admin_status = admin_status
@@ -25,10 +28,13 @@ class SqlAccess:
         return conn
     
     def user_exists(self):
+        # is the user is the all_users table
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute(f"SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id='{self.student_id}')")
         exists = cursor.fetchone()[0]
+        cursor.close()
+        conn.close()
         return exists
 
 
@@ -95,13 +101,15 @@ class SqlAccess:
         """
 
     def read_all_users(self):
-        # admin check doesn't work
         if self.admin_status == 0:
             return "user doesn't have admin status"
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
-        return cursor.fetchall()
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return data
     
     def read_user_table(self, student_id):
         if self.admin_status == 0:
@@ -110,6 +118,11 @@ class SqlAccess:
         cursor = conn.cursor()
         try:
             cursor.execute(f"""SELECT * FROM user_{student_id}""")
-            return cursor.fetchall()
+            data = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return data
         except sqlite3.OperationalError as e:
+            cursor.close()
+            conn.close()
             return f"{e}"
