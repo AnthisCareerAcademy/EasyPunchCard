@@ -15,6 +15,7 @@ class User:
             # if there is data use the data to create another user
             if data is not None:
                 self.access.add_self(data["username"])
+
     
     def __str__(self) -> str:
-        return f"{self.first_name} {self.last_name} with Unique ID {self.unique_id}"
+        return f"{self.first_name} {self.last_name} with Unique ID {self.unique_id} has {self.current_hours} hrs and their last clock action was {self.last_clock_action}"
