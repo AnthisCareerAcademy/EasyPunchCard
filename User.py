@@ -4,7 +4,8 @@ from database import SqlAccess
 
 class User:
     def __init__(self, unique_id: str, data:dict=None) -> None:
-        # TODO first check unique_id exists first
+        """if there is data for a new user the data should be a dict with parameters data["username"] and data["admin_status"]"""
+        # first check unique_id exists first
         self.access = SqlAccess(unique_id, data["admin_status"])
         # if so it'll use data from the db
         if self.access.exists:
