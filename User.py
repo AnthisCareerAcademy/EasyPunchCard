@@ -17,10 +17,3 @@ class User:
     
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name} with Unique ID {self.unique_id}"
-
-
-data = {"username": "AungAung", "admin_status": 1}
-admin = User("1234", data)
-print(admin.access.read_all_users())
-print(admin.access.read_user_table('1222'))
-print(admin.access.read_user_table('4567'))
