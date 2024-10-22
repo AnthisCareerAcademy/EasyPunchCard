@@ -1,7 +1,7 @@
 import sqlite3
 
 class SqlAccess:
-    """alskdfjlkasjf"""
+    """Allows the User Class to connect to the EasyPunchCard database. Creates table, allows all users to add themself, and allows admins reads data."""
     def __init__(self, student_id:str, admin_status:int=None):
         self.create_table()
         self.student_id = student_id
