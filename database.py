@@ -128,13 +128,16 @@ class SqlAccess:
             conn.close()
             return f"{e}"
         
-    def database_to_excel(self, table_name:str):
-        """Export the records from the database to an Excel file."""
+    def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
+        """
+        Export the records from the database to an Excel file.
+        arguments are SQLite table name and the name you want the file to be (default is 'EasyPunchCard')
+        """
         if self.admin_status == 0:
             raise "Error: user doesn't have admin status"
         
-        query = f'SELECT * FROM {table_name}'
+        query = f'SELECT * FROM {sql_table_name}'
         conn = self.get_db()
         df = read_sql_query(query, conn)
-        df.to_excel("EasyPunchCard.xlsx", index=True)
+        df.to_excel(f"{file_name}.xlsx", index=True)
         conn.close()
