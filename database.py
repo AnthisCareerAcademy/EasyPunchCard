@@ -10,7 +10,7 @@ class SqlAccess:
             # check if user exists
             conn = self.get_db()
             cursor = conn.cursor()
-            cursor.execute(f"SELECT admin_status FROM all_users WHERE student_id='{self.student_id}'")
+            cursor.execute("SELECT admin_status FROM all_users WHERE student_id = %s", self.student_id)
             self.admin_status = cursor.fetchone()[0]
             cursor.close()
             conn.close()
@@ -31,7 +31,7 @@ class SqlAccess:
         # is the user is the all_users table
         conn = self.get_db()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id='{self.student_id}')")
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = %s)", self.student_id)
         exists = cursor.fetchone()[0]
         cursor.close()
         conn.close()
@@ -46,6 +46,7 @@ class SqlAccess:
                        student_id TEXT PRIMARY KEY,
                        username TEXT NOT NULL,
                        admin_status INT NOT NULL,
+                       start_time TEXT,
                        total_minutes INT
                        )
                        ''')
@@ -58,10 +59,10 @@ class SqlAccess:
         conn = self.get_db()
         cursor = conn.cursor()
         # Add user into main table
-        cursor.execute(f'''
-                        INSERT INTO all_users(student_id, username, admin_status, total_minutes)
-                        VALUES('{self.student_id}', '{username}', {self.admin_status}, 0)
-                        ''')
+        cursor.execute('''
+                       INSERT INTO all_users (student_id, username, admin_status, start_time, total_minutes)
+                       VALUES (%s, %s, %s, NULL, 0)
+                       ''', (self.student_id, username, self.admin_status))
         # create table for user
         cursor.execute(f'''
                         CREATE TABLE IF NOT EXISTS user_{self.student_id} (
@@ -90,7 +91,7 @@ class SqlAccess:
         ***issue here
 
         query to insert a row into user table
-        'INSERT INTO user_{student_id}(student_id, date, start_time, end_time, total_minutes)
+        'INSERT INTO user_{student_id}INSERT INTO user_{student_id}(student_id, date, start_time, end_time, total_minutes)
         VALUES({student_id}, {date}, {start_time}, {end_time}, {total_minutes})'
         update total_minutes in all_users
         'UPDATE all_users SET total_minutes = {total_minutes} WHERE student_id = {student_id}'
