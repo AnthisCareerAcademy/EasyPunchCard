@@ -1,19 +1,20 @@
+import sqlite3
+
+from database import SqlAccess
+
 class User:
-    def __init__(self, first_name: str, last_name: str, unique_id: str, is_admin: bool = False, current_hours: float = 0.0, last_clock_action: str = "") -> None:
-        self.first_name = first_name
-        self.last_name = last_name
-        self.unique_id = unique_id
-        self.is_admin = is_admin
-        self.current_hours = current_hours
-        self.last_clock_action = last_clock_action
+    def __init__(self, unique_id: str, data:dict=None) -> None:
+        """if there is data for a new user the data should be a dict with parameters data["username"] and data["admin_status"]"""
+        # first check unique_id exists first
+        self.access = SqlAccess(unique_id, data["admin_status"])
+        # if so it'll use data from the db
+        if self.access.exists:
+            print(f"{sqlite3.IntegrityError}: student_id already exists in table")
 
-    def clock_in(self):
-        """Set the user to clock in"""
-        pass
-
-    def clock_out(self):
-        """Set the user to clock out"""
-        pass
+        else:
+            # if there is data use the data to create another user
+            if data is not None:
+                self.access.add_self(data["username"])
 
     
     def __str__(self) -> str:
