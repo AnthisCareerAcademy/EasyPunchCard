@@ -1,40 +1,51 @@
 from datetime import datetime
-import sqlite3
+from database import SqlAccess
 
 class Clock:
     """
-    Clock class will allow User to punch in or punch out and record the time spent between
+    Clock class will allow User to clock in or clock out and record the time spent between
     Execute the close method after done using Clock class
     """
-    def __init__(self, unique_id: str, database_path: str) -> None:
-        self.id = unique_id
-        self.conn = sqlite3.connect(database_path)
-        self.working = self.conn.execute(f"SELECT working FROM students WHERE id = {self.id}")
+    def __init__(self, student_id: str) -> None:
+        self.id = student_id
+        # by now the student should be in the database
+        self.access = SqlAccess(student_id)
 
-    def punch_in(self):
-        if self.working:
-            return
-        cursor = self.conn.cursor()
-        cursor.execute(f"UPDATE students SET working = 1 WHERE id = {self.id}")
-        cursor.execute(f"UPDATE students SET start_time = '{datetime.now()}' WHERE id = {self.id}")
-        self.conn.commit()
+    def clock_in(self):
+        conn = self.access.get_db()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT total_minutes FROM all_users WHERE student_id = %s", (self.id,))
+        total_minutes = cursor.fetchone()[0]
+        date = datetime.now().strftime("%m/%d/%Y")
+        start_time = datetime.now()
+        query = f"""INSERT INTO user_{self.id} (student_id, date, start_time, end_time, total_minutes) 
+                VALUES (%s, %s, %s, NULL, %s)"""
+        values = (self.id, date, start_time, total_minutes)  # Ensure total_minutes is defined
+        # values will be updated again once user clocks out
+        cursor.execute(query, values)
+        cursor.execute("UPDATE all_users SET start_time = %s WHERE student_id = %s", (start_time, self.id))
+        conn.commit()
+
         cursor.close()
-
-    def punch_out(self):
-        if not self.working:
-            return
-        cursor = self.conn.cursor()
-        cursor.execute(f"UPDATE students SET working = 0 WHERE id = {self.id}")
-        end_time = datetime.now()
-        cursor.execute(f"UPDATE students SET start_time = '{end_time}' WHERE id = {self.id}")
-        cursor.execute(f"SELECT start_time FROM students WHERE id = {self.id}")
+        conn.close()
+    
+    def clock_out(self):
+        conn = self.access.get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT start_time FROM all_users WHERE student_id = %s", self.id)
+        # turn back into datetime object
         start_time = datetime.strptime((cursor.fetchone())[0], "%Y-%m-%d %H:%M:%S.%f")
-        total_minutes_worked = ((end_time-start_time).total_seconds())/60
-        cursor.execute(f"SELECT total_minutes FROM students WHERE id = {self.id}")
-        total_minutes = (cursor.fetchone())[0] + format(total_minutes_worked, '.2f')
-        cursor.execute(f"UPDATE students SET total_hours = {total_minutes} WHERE id = {self.id}")
-        self.conn.commit()
-        cursor.close()
+        cursor.execute("SELECT total_minutes FROM all_users WHERE student_id = %s", self.id)
+        total_minutes = int(cursor.fetchone()[0])
+        end_time = datetime.now()
+        time_worked = int((end_time-start_time).total_seconds()/60)
+        total_minutes += time_worked
+        # reset start time and update total minutes in all_users
+        cursor.execute("UPDATE all_users SET total_minutes = %s, start_time = NULL WHERE student_id = %s", (total_minutes, self.id))
+        # update end time and total_minutes in user table
+        cursor.execute(f"UPDATE user_{self.id} end_time = %s, total_minutes = %s WHERE student_id = %s", (end_time, total_minutes, self.id))
+        conn.commit()
 
-    def close(self):
-        self.conn.close()
+        cursor.close()
+        conn.close()
