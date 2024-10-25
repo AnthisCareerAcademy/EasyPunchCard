@@ -10,7 +10,7 @@ class SqlAccess:
             # check if user exists
             conn = self.get_db()
             cursor = conn.cursor()
-            cursor.execute("SELECT admin_status FROM all_users WHERE student_id = %s", self.student_id)
+            cursor.execute("SELECT admin_status FROM all_users WHERE student_id = ?", (self.student_id,))
             self.admin_status = cursor.fetchone()[0]
             cursor.close()
             conn.close()
@@ -20,18 +20,18 @@ class SqlAccess:
             else:
                 raise ValueError("User does not exist and no correct data provided for admin_status")
         
-        
 
     @staticmethod
     def get_db():
         conn = sqlite3.connect('EasyPunchCard.db')
         return conn
     
+
     def user_exists(self):
         # is the user is the all_users table
         conn = self.get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = %s)", self.student_id)
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = ?)", (self.student_id,))
         exists = cursor.fetchone()[0]
         cursor.close()
         conn.close()
@@ -47,6 +47,7 @@ class SqlAccess:
                        username TEXT NOT NULL,
                        admin_status INT NOT NULL,
                        start_time TEXT,
+                       working_status INT,
                        total_minutes INT
                        )
                        ''')
@@ -60,8 +61,8 @@ class SqlAccess:
         cursor = conn.cursor()
         # Add user into main table
         cursor.execute('''
-                       INSERT INTO all_users (student_id, username, admin_status, start_time, total_minutes)
-                       VALUES (%s, %s, %s, NULL, 0)
+                       INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                       VALUES (?, ?, ?, NULL, 0, 0)
                        ''', (self.student_id, username, self.admin_status))
         # create table for user
         cursor.execute(f'''
@@ -101,6 +102,7 @@ class SqlAccess:
         close the connection
         """
 
+
     def read_all_users(self):
         if self.admin_status == 0:
             return "user doesn't have admin status"
@@ -112,6 +114,7 @@ class SqlAccess:
         conn.close()
         return data
     
+
     def read_user_table(self, student_id):
         if self.admin_status == 0:
             return "user doesn't have admin status"
