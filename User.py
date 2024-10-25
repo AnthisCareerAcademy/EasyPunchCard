@@ -1,6 +1,7 @@
 import sqlite3
 
 from database import SqlAccess
+from Clock import Clock
 
 class User:
     def __init__(self, unique_id: str, data:dict=None) -> None:
@@ -10,11 +11,15 @@ class User:
         # if so it'll use data from the db
         if self.access.exists:
             print(f"{sqlite3.IntegrityError}: student_id already exists in table")
+            self.clock = Clock(unique_id)
 
         else:
             # if there is data use the data to create another user
             if data is not None:
                 self.access.add_self(data["username"])
+                self.clock = Clock(unique_id)
+            else:
+                raise 'ERROR: data["admin_status"] needs to be an INT'
 
     
     def __str__(self) -> str:
