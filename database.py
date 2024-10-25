@@ -130,3 +130,17 @@ class SqlAccess:
             cursor.close()
             conn.close()
             return f"{e}"
+        
+    def read_self_table(self):
+        conn = self.get_db()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(f"""SELECT * FROM user_{self.student_id}""")
+            data = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return data
+        except sqlite3.OperationalError as e:
+            cursor.close()
+            conn.close()
+            return f"{e}"
