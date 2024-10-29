@@ -11,7 +11,7 @@ class SqlAccess:
             # check if user exists
             conn = self.get_db()
             cursor = conn.cursor()
-            cursor.execute(f"SELECT admin_status FROM all_users WHERE student_id='{self.student_id}'")
+            cursor.execute("SELECT admin_status FROM all_users WHERE student_id = ?", (self.student_id,))
             self.admin_status = cursor.fetchone()[0]
             cursor.close()
             conn.close()
@@ -21,18 +21,18 @@ class SqlAccess:
             else:
                 raise ValueError("User does not exist and no correct data provided for admin_status")
         
-        
 
     @staticmethod
     def get_db():
         conn = sqlite3.connect('EasyPunchCard.db')
         return conn
     
+
     def user_exists(self):
         # is the user is the all_users table
         conn = self.get_db()
         cursor = conn.cursor()
-        cursor.execute(f"SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id='{self.student_id}')")
+        cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = ?)", (self.student_id,))
         exists = cursor.fetchone()[0]
         cursor.close()
         conn.close()
@@ -47,6 +47,8 @@ class SqlAccess:
                        student_id TEXT PRIMARY KEY,
                        username TEXT NOT NULL,
                        admin_status INT NOT NULL,
+                       start_time TEXT,
+                       working_status INT,
                        total_minutes INT
                        )
                        ''')
@@ -59,10 +61,10 @@ class SqlAccess:
         conn = self.get_db()
         cursor = conn.cursor()
         # Add user into main table
-        cursor.execute(f'''
-                        INSERT INTO all_users(student_id, username, admin_status, total_minutes)
-                        VALUES('{self.student_id}', '{username}', {self.admin_status}, 0)
-                        ''')
+        cursor.execute('''
+                       INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                       VALUES (?, ?, ?, NULL, 0, 0)
+                       ''', (self.student_id, username, self.admin_status))
         # create table for user
         cursor.execute(f'''
                         CREATE TABLE IF NOT EXISTS user_{self.student_id} (
@@ -91,7 +93,7 @@ class SqlAccess:
         ***issue here
 
         query to insert a row into user table
-        'INSERT INTO user_{student_id}(student_id, date, start_time, end_time, total_minutes)
+        'INSERT INTO user_{student_id}INSERT INTO user_{student_id}(student_id, date, start_time, end_time, total_minutes)
         VALUES({student_id}, {date}, {start_time}, {end_time}, {total_minutes})'
         update total_minutes in all_users
         'UPDATE all_users SET total_minutes = {total_minutes} WHERE student_id = {student_id}'
@@ -100,6 +102,7 @@ class SqlAccess:
         close the cursor
         close the connection
         """
+
 
     def read_all_users(self):
         if self.admin_status == 0:
@@ -112,6 +115,7 @@ class SqlAccess:
         conn.close()
         return data
     
+
     def read_user_table(self, student_id):
         if self.admin_status == 0:
             raise "Error: user doesn't have admin status"
@@ -128,6 +132,20 @@ class SqlAccess:
             conn.close()
             return f"{e}"
         
+    def read_self_table(self):
+        conn = self.get_db()
+        cursor = conn.cursor()
+        try:
+            cursor.execute(f"""SELECT * FROM user_{self.student_id}""")
+            data = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return data
+        except sqlite3.OperationalError as e:
+            cursor.close()
+            conn.close()
+            return f"{e}"
+          
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
