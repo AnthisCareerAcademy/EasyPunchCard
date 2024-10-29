@@ -1,4 +1,5 @@
 import sqlite3
+from pandas import read_sql_query
 
 class SqlAccess:
     """Allows the User Class to connect to the EasyPunchCard database. Creates table, allows all users to add themself, and allows admins reads data."""
@@ -105,7 +106,7 @@ class SqlAccess:
 
     def read_all_users(self):
         if self.admin_status == 0:
-            return "user doesn't have admin status"
+            raise "Error: user doesn't have admin status"
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
@@ -117,7 +118,7 @@ class SqlAccess:
 
     def read_user_table(self, student_id):
         if self.admin_status == 0:
-            return "user doesn't have admin status"
+            raise "Error: user doesn't have admin status"
         conn = self.get_db()
         cursor = conn.cursor()
         try:
@@ -144,3 +145,17 @@ class SqlAccess:
             cursor.close()
             conn.close()
             return f"{e}"
+          
+    def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
+        """
+        Export the records from the database to an Excel file.
+        arguments are SQLite table name and the name you want the file to be (default is 'EasyPunchCard')
+        """
+        if self.admin_status == 0:
+            raise "Error: user doesn't have admin status"
+        
+        query = f'SELECT * FROM {sql_table_name}'
+        conn = self.get_db()
+        df = read_sql_query(query, conn)
+        df.to_excel(f"{file_name}.xlsx", index=True)
+        conn.close()
