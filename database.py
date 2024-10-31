@@ -81,6 +81,60 @@ class SqlAccess:
         cursor.close()
         conn.close()
 
+    def add_user(self, student_id:str, username:str, admin_status:int):
+        if self.admin_status == 0:
+            raise "Error: user doesn't have admin status"
+        
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+
+            # user is not an admin
+            if admin_status == 0:
+                cursor.execute('''
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                VALUES (?, ?, ?, NULL, 0, 0)
+                ''', (student_id, username, admin_status))
+
+                cursor.execute(f'''
+                                CREATE TABLE IF NOT EXISTS user_{student_id} (
+                                student_id TEXT,
+                                date TEXT,
+                                start_time TEXT,
+                                end_time TEXT,
+                                total_minutes INT,
+                                CONSTRAINT FK_student_id FOREIGN KEY (student_id)
+                                REFERENCES all_users(student_id)
+                                )
+                                ''')
+                conn.commit()
+                cursor.close()
+
+            # user is an admin
+            elif admin_status == 1:
+                cursor.execute('''
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                VALUES (?, ?, ?, NULL, 0, 0)
+                ''', (student_id, username, admin_status))
+                conn.commit()
+                cursor.close()
+
+                  
+    def remove_user(self, student_id:str):
+        if self.admin_status == 0:
+            raise "Error: user doesn't have admin status"
+        if self.student_id == student_id:
+            raise "Error: can't delete self"
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            query = f"DELETE FROM "
+        # will finish later
+
+        
+                
+
+
+        
+
 
     def update_time(self, additional_minutes:int):
         """
@@ -145,6 +199,17 @@ class SqlAccess:
             cursor.close()
             conn.close()
             return f"{e}"
+        
+    def get_column_from_all_user(self, column_name:str):
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            cursor.execute(query, (self.student_id,))
+            # data from that column
+            data = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+        return data
           
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
