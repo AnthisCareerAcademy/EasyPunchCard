@@ -14,12 +14,10 @@ class User:
             self.clock = Clock(unique_id)
 
         else:
-            # if there is data use the data to create another user
             if data is not None:
-                self.access.add_self(data["username"])
-                self.clock = Clock(unique_id)
+                raise TypeError("ERROR: User does not exist")
             else:
-                raise 'ERROR: data["admin_status"] needs to be an INT'
+                raise TypeError('ERROR: data["admin_status"] needs to be an INT')
 
     
     def __str__(self) -> str:
