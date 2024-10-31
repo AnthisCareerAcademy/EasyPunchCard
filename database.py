@@ -126,14 +126,18 @@ class SqlAccess:
             raise "Error: can't delete self"
         with self.get_db() as conn:
             cursor = conn.cursor()
-            query = f"DELETE FROM "
-        # will finish later
-
-        
-                
-
-
-        
+            admin_status = self.admin_get_all_user_data(student_id, "admin_status")
+            if admin_status == 1:
+                query = "DELETE FROM all_users WHERE student_id = ?"
+                cursor.execute(query, (student_id,))
+                conn.commit()
+                cursor.close()
+            else:
+                query = "DELETE FROM all_users WHERE student_id = ?"
+                cursor.execute(query, (student_id,))
+                cursor.execute(f"DROP TABLE user_{student_id}")
+                conn.commit()
+                cursor.close()
 
 
     def update_time(self, additional_minutes:int):
@@ -186,6 +190,7 @@ class SqlAccess:
             conn.close()
             return f"{e}"
         
+
     def read_self_table(self):
         conn = self.get_db()
         cursor = conn.cursor()
@@ -200,7 +205,8 @@ class SqlAccess:
             conn.close()
             return f"{e}"
         
-    def get_column_from_all_user(self, column_name:str):
+
+    def get_all_user_data(self, column_name:str):
         with self.get_db() as conn:
             cursor = conn.cursor()
             query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
@@ -210,7 +216,23 @@ class SqlAccess:
             cursor.close()
             conn.close()
         return data
+    
+    
+    def admin_get_all_user_data(self, student_id:str, column_name:str):
+        if self.admin_status == 0:
+            raise "Error: user doesn't have admin status"
+        
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            cursor.execute(query, (student_id,))
+            # data from that column
+            data = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+        return data
           
+
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
