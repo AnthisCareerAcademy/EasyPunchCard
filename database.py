@@ -220,12 +220,11 @@ class SqlAccess:
     def get_all_user_data(self, column_name:str):
         with self.get_db() as conn:
             cursor = conn.cursor()
-            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (self.student_id,))
             # data from that column
             data = cursor.fetchone()[0]
             cursor.close()
-            conn.close()
         return data
     
     
@@ -235,12 +234,11 @@ class SqlAccess:
         
         with self.get_db() as conn:
             cursor = conn.cursor()
-            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (student_id,))
             # data from that column
             data = cursor.fetchone()[0]
             cursor.close()
-            conn.close()
         return data
           
 
