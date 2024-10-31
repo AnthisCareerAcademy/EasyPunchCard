@@ -40,26 +40,37 @@ class SqlAccess:
 
 
     def create_table(self):
-        conn = self.get_db()
-        cursor = conn.cursor()
-        cursor.execute('''
-                       CREATE TABLE IF NOT EXISTS all_users(
-                       student_id TEXT PRIMARY KEY,
-                       username TEXT NOT NULL,
-                       admin_status INT NOT NULL,
-                       start_time TEXT,
-                       working_status INT,
-                       total_minutes INT
-                       )
-                       ''')
-        conn.commit()
-        cursor.close()
-        conn.close()
-
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS all_users(
+                    student_id TEXT PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    admin_status INT NOT NULL,
+                    start_time TEXT,
+                    working_status INT,
+                    total_minutes INT
+                )
+            ''')
+            
+            # Check if the admin user already exists
+            cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = '0000')")
+            exists = cursor.fetchone()[0]
+            
+            # Insert the admin user only if they do not exist
+            if not exists:
+                cursor.execute('''
+                    INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', ('0000', 'admin_user', 1, None, 0, 0))
+            
+            conn.commit()
 
     def add_self(self, username:str):
         conn = self.get_db()
         cursor = conn.cursor()
+        if self.user_exists():
+            raise ValueError("ERROR: user already exists")
         # Add user into main table
         cursor.execute('''
                        INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
@@ -80,6 +91,64 @@ class SqlAccess:
         conn.commit()
         cursor.close()
         conn.close()
+
+    def add_user(self, student_id:str, username:str, admin_status:int):
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+
+            # user is not an admin
+            if admin_status == 0:
+                cursor.execute('''
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                VALUES (?, ?, ?, NULL, 0, 0)
+                ''', (student_id, username, admin_status))
+
+                cursor.execute(f'''
+                                CREATE TABLE IF NOT EXISTS user_{student_id} (
+                                student_id TEXT,
+                                date TEXT,
+                                start_time TEXT,
+                                end_time TEXT,
+                                total_minutes INT,
+                                CONSTRAINT FK_student_id FOREIGN KEY (student_id)
+                                REFERENCES all_users(student_id)
+                                )
+                                ''')
+                conn.commit()
+                cursor.close()
+
+            # user is an admin
+            elif admin_status == 1:
+                cursor.execute('''
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                VALUES (?, ?, ?, NULL, 0, 0)
+                ''', (student_id, username, admin_status))
+                conn.commit()
+                cursor.close()
+
+                  
+    def remove_user(self, student_id:str):
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        if self.student_id == student_id:
+            raise TypeError("Error: can't delete self")
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            admin_status = self.admin_get_all_user_data(student_id, "admin_status")
+            if admin_status == 1:
+                query = "DELETE FROM all_users WHERE student_id = ?"
+                cursor.execute(query, (student_id,))
+                conn.commit()
+                cursor.close()
+            else:
+                query = "DELETE FROM all_users WHERE student_id = ?"
+                cursor.execute(query, (student_id,))
+                cursor.execute(f"DROP TABLE user_{student_id}")
+                conn.commit()
+                cursor.close()
 
 
     def update_time(self, additional_minutes:int):
@@ -106,7 +175,7 @@ class SqlAccess:
 
     def read_all_users(self):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
@@ -118,7 +187,7 @@ class SqlAccess:
 
     def read_user_table(self, student_id):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
         cursor = conn.cursor()
         try:
@@ -132,6 +201,7 @@ class SqlAccess:
             conn.close()
             return f"{e}"
         
+
     def read_self_table(self):
         conn = self.get_db()
         cursor = conn.cursor()
@@ -145,14 +215,42 @@ class SqlAccess:
             cursor.close()
             conn.close()
             return f"{e}"
+        
+
+    def get_all_user_data(self, column_name:str):
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            cursor.execute(query, (self.student_id,))
+            # data from that column
+            data = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+        return data
+    
+    
+    def admin_get_all_user_data(self, student_id:str, column_name:str):
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            query = f"SELECT {column_name} FROM all_user WHERE student_id = ?"
+            cursor.execute(query, (student_id,))
+            # data from that column
+            data = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+        return data
           
+
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
         arguments are SQLite table name and the name you want the file to be (default is 'EasyPunchCard')
         """
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         
         query = f'SELECT * FROM {sql_table_name}'
         conn = self.get_db()
