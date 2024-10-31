@@ -83,7 +83,7 @@ class SqlAccess:
 
     def add_user(self, student_id:str, username:str, admin_status:int):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         
         with self.get_db() as conn:
             cursor = conn.cursor()
@@ -121,9 +121,9 @@ class SqlAccess:
                   
     def remove_user(self, student_id:str):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         if self.student_id == student_id:
-            raise "Error: can't delete self"
+            raise TypeError("Error: can't delete self")
         with self.get_db() as conn:
             cursor = conn.cursor()
             admin_status = self.admin_get_all_user_data(student_id, "admin_status")
@@ -164,7 +164,7 @@ class SqlAccess:
 
     def read_all_users(self):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
@@ -176,7 +176,7 @@ class SqlAccess:
 
     def read_user_table(self, student_id):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
         cursor = conn.cursor()
         try:
@@ -220,7 +220,7 @@ class SqlAccess:
     
     def admin_get_all_user_data(self, student_id:str, column_name:str):
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         
         with self.get_db() as conn:
             cursor = conn.cursor()
@@ -239,7 +239,7 @@ class SqlAccess:
         arguments are SQLite table name and the name you want the file to be (default is 'EasyPunchCard')
         """
         if self.admin_status == 0:
-            raise "Error: user doesn't have admin status"
+            raise ValueError("Error: user doesn't have admin status")
         
         query = f'SELECT * FROM {sql_table_name}'
         conn = self.get_db()
