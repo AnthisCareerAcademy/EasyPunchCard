@@ -4,6 +4,7 @@ from database import SqlAccess
 from Clock import Clock
 
 class User:
+    # default admin is unique_id = 0000
     def __init__(self, unique_id: str, data:dict=None) -> None:
         """if there is data for a new user the data should be a dict with parameters data["username"] and data["admin_status"]"""
         # first check unique_id exists first

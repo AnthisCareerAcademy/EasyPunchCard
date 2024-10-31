@@ -40,26 +40,37 @@ class SqlAccess:
 
 
     def create_table(self):
-        conn = self.get_db()
-        cursor = conn.cursor()
-        cursor.execute('''
-                       CREATE TABLE IF NOT EXISTS all_users(
-                       student_id TEXT PRIMARY KEY,
-                       username TEXT NOT NULL,
-                       admin_status INT NOT NULL,
-                       start_time TEXT,
-                       working_status INT,
-                       total_minutes INT
-                       )
-                       ''')
-        conn.commit()
-        cursor.close()
-        conn.close()
-
+        with self.get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS all_users(
+                    student_id TEXT PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    admin_status INT NOT NULL,
+                    start_time TEXT,
+                    working_status INT,
+                    total_minutes INT
+                )
+            ''')
+            
+            # Check if the admin user already exists
+            cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = '0000')")
+            exists = cursor.fetchone()[0]
+            
+            # Insert the admin user only if they do not exist
+            if not exists:
+                cursor.execute('''
+                    INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', ('0000', 'admin_user', 1, None, 0, 0))
+            
+            conn.commit()
 
     def add_self(self, username:str):
         conn = self.get_db()
         cursor = conn.cursor()
+        if self.user_exists():
+            raise ValueError("ERROR: user already exists")
         # Add user into main table
         cursor.execute('''
                        INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
