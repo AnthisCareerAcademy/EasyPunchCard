@@ -2,7 +2,10 @@ import sqlite3
 from pandas import read_sql_query
 
 class SqlAccess:
-    """Allows the User Class to connect to the EasyPunchCard database. Creates table, allows all users to add themself, and allows admins reads data."""
+    """
+    Allows the User Class to connect to the EasyPunchCard database. 
+    Creates table, allows all users to add themself, and allows admins reads data.
+    """
     def __init__(self, student_id:str, admin_status:int=None):
         self.create_table()
         self.student_id = student_id
@@ -29,7 +32,7 @@ class SqlAccess:
     
 
     def user_exists(self):
-        # is the user is the all_users table
+        """is the user is the all_users table"""
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = ?)", (self.student_id,))
@@ -67,6 +70,9 @@ class SqlAccess:
             conn.commit()
 
     def add_self(self, username:str):
+        """
+        allows any user to add themselves to the database
+        """
         conn = self.get_db()
         cursor = conn.cursor()
         if self.user_exists():
@@ -93,6 +99,9 @@ class SqlAccess:
         conn.close()
 
     def add_user(self, student_id:str, username:str, admin_status:int):
+        """
+        allows admin users to add users to the database
+        """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         
@@ -131,6 +140,9 @@ class SqlAccess:
 
                   
     def remove_user(self, student_id:str):
+        """
+        allows admin users to remove users from the database
+        """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         if self.student_id == student_id:
@@ -173,7 +185,10 @@ class SqlAccess:
         """
 
 
-    def read_all_users(self):
+    def admin_read_all_users(self):
+        """
+        allows admin to retrieve all the data form the all_users table
+        """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
@@ -185,7 +200,10 @@ class SqlAccess:
         return data
     
 
-    def read_user_table(self, student_id):
+    def admin_read_self_table(self, student_id:str):
+        """
+        allow admin users to retreive all the data from a specified user_(ID) table
+        """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
@@ -203,6 +221,9 @@ class SqlAccess:
         
 
     def read_self_table(self):
+        """
+        allows the user to retreive all the data from their own user_(ID) table
+        """
         conn = self.get_db()
         cursor = conn.cursor()
         try:
@@ -217,18 +238,23 @@ class SqlAccess:
             return f"{e}"
         
 
-    def get_all_user_data(self, column_name:str):
+    def get_data_all_users(self, column_name:str):
+        """
+        allow user to read a single cell from their own row on all_users
+        """
         with self.get_db() as conn:
             cursor = conn.cursor()
             query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (self.student_id,))
             # data from that column
-            data = cursor.fetchone()[0]
-            cursor.close()
+            data = cursor.fetchone()
         return data
     
     
-    def admin_get_all_user_data(self, student_id:str, column_name:str):
+    def admin_get_data_all_users(self, student_id:str, column_name:str):
+        """
+        Allows admins to read a single cell from all_users of a specified ID and column name
+        """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         
@@ -237,9 +263,29 @@ class SqlAccess:
             query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (student_id,))
             # data from that column
-            data = cursor.fetchone()[0]
-            cursor.close()
+            data = cursor.fetchone()
         return data
+    
+
+    def admin_get_row_all_users(self, student_id:str):
+        """
+        allows admin to retrieve a specified user's row from all_users table
+        """
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        try:
+            with self.get_db() as conn:
+                cursor = conn.cursor()
+                query = "SELECT * FROM all_users WHERE student_id = ?"
+                cursor.execute(query, (student_id,))
+                # Fetch one row from the result
+                data = cursor.fetchone()
+                if data is None:
+                    return None
+                return data
+        except Exception as e:
+            # Log the error, or raise a custom exception if needed
+            raise RuntimeError(f"Error retrieving data: {str(e)}")
           
 
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
