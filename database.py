@@ -151,7 +151,7 @@ class SqlAccess:
             raise TypeError("Error: can't delete self")
         with self.get_db() as conn:
             cursor = conn.cursor()
-            admin_status = self.admin_get_all_user_data(student_id, "admin_status")
+            admin_status = self.admin_get_data_all_users(student_id, "admin_status")
             if admin_status == 1:
                 query = "DELETE FROM all_users WHERE student_id = ?"
                 cursor.execute(query, (student_id,))
