@@ -32,7 +32,9 @@ class SqlAccess:
     
 
     def user_exists(self):
-        """is the user is the all_users table"""
+        """
+        check if the student_id is in the all_users table
+        """
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = ?)", (self.student_id,))
