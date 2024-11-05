@@ -249,7 +249,7 @@ class SqlAccess:
             query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (self.student_id,))
             # data from that column
-            data = cursor.fetchone()
+            data = cursor.fetchone()[0]
         return data
     
     
@@ -265,7 +265,7 @@ class SqlAccess:
             query = f"SELECT {column_name} FROM all_users WHERE student_id = ?"
             cursor.execute(query, (student_id,))
             # data from that column
-            data = cursor.fetchone()
+            data = cursor.fetchone()[0]
         return data
     
 
