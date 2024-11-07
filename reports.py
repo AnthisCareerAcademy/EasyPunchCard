@@ -1,31 +1,36 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import datetime
+import os
+from database import SqlAccess
 
 
 class Report():
-    def __init__(self):
-        """Placeholder. Need help to put stuff here"""
+    def __init__(self, unique_id):
+        self.access = SqlAccess(unique_id)
 
-    def calculate_pages(self):
+    @staticmethod
+    def calculate_pages(data):
         """
         Simulated for loop counter (for total page count)
         """
         fake_y_pos = 615
         total_pages = 1
-        for i in range(len(data['names'])):
+        for i in range(len(data)):
             if fake_y_pos < 40:
                 total_pages += 1
                 fake_y_pos = 730
             fake_y_pos -= 16
         return total_pages
 
-    def create_basic_pdf(self, file_name, company_name, title, start_date, end_date, data):
+    def create_basic_pdf(self, file_name, company_name, title, start_date, end_date):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
         page_num = 1
         y_pos = 625
+        data = self.access.admin_read_all_users()
+        print(data)
 
         # Set up the canvas
         c = canvas.Canvas(file_name, pagesize=letter)
@@ -50,7 +55,7 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 645, 525, 645)
 
-        total_pages = self.calculate_pages()
+        total_pages = self.calculate_pages(data)
 
         # First page set up
         c.setFont("Helvetica", 10)
@@ -58,7 +63,7 @@ class Report():
         c.drawString(30, 30, current_time)
 
         # Loop through all names and total minutes
-        for i, (name, time) in enumerate(zip(data['names'], data['times'])):
+        for row in data:
             if y_pos < 70:
                 # Create new page and add page number at the bottom
                 c.showPage()
@@ -72,20 +77,21 @@ class Report():
                 y_pos = 730
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
-            c.drawString(80, y_pos, name)
-            c.drawString(370, y_pos, time)
+            c.drawString(80, y_pos, row[1])
+            c.drawString(370, y_pos, str(row[-1]))
             y_pos -= 16
 
         # Save the PDF
         c.save()
 
-    def create_detailed_pdf(self, file_name, company_name, title, username,
-                            start_date, end_date, data):
+    def create_user_specific_pdf(self, file_name, company_name, title,
+                            start_date, end_date, name, student_id):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
         page_num = 1
         y_pos = 605
+        data = self.access.admin_read_self_table(student_id)
 
         # Set up the canvas
         c = canvas.Canvas(file_name, pagesize=letter)
@@ -102,7 +108,7 @@ class Report():
 
         # Username
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(30, 662, username)
+        c.drawString(30, 662, name)
 
         # Header
         c.setFont("Helvetica-Bold", 12)
@@ -116,7 +122,7 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 622, 525, 622)
 
-        total_pages = self.calculate_pages()
+        total_pages = self.calculate_pages(data)
 
         # First page set up
         c.setFont("Helvetica", 10)
@@ -124,8 +130,7 @@ class Report():
         c.drawString(30, 30, current_time)
 
         # Loop through all names and total minutes
-        for i, (date, clock_in, clock_out, total_time) in enumerate(
-                zip(data['date'], data['clock_in'], data['clock_out'], data['times'])):
+        for row in data:
             if y_pos < 70:
                 # Create new page and add page number at the bottom
                 c.showPage()
@@ -137,39 +142,29 @@ class Report():
                 c.drawString(30, 30, current_time)
                 # Reset y position to top of next page
                 y_pos = 730
-            # Name and total hours:minutes
+            # Date, clock in time, clock out time, and total minutes
             c.setFont("Helvetica", 12)
-            c.drawString(75, y_pos, date)
-            c.drawRightString(245, y_pos, clock_in)
-            c.drawRightString(375, y_pos, clock_out)
-            c.drawString(460, y_pos, total_time)
+            c.drawString(75, y_pos, row[1])
+            c.drawRightString(245, y_pos, row[2])
+            c.drawRightString(375, y_pos, row[3])
+            c.drawString(460, y_pos, row[4])
             y_pos -= 16
 
         # Save the PDF
         c.save()
+
+    def download_pdf(self, file_name):
+        if os.name == "nt":
+            os.startfile(file_name)
 
 # Hardcode info for now
 company = "Anthis Cosmetology"
 title = "Time Clock Total Report"
 start_date = "05/15/2024"
 end_date = "06/20/2024"
-data = {
-    'names': ['Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob',
-              'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie',
-              'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks',
-              'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob',
-              'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie',
-              'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks',
-              'Alice', 'Bob', 'Charlie', 'Logan sucks', 'Alice', 'Bob', 'Charlie', 'Logan sucks'],
-    'times': ['11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03',
-              '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52',
-              '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23',
-              '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90',
-              '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03',
-              '-50:90', '11:23', '08:52', '00:03', '-50:90', '11:23', '08:52', '00:03', '-50:90']
-}
 # Create the PDF
-report = Report()
-report.create_detailed_pdf("simple_reportlab_pdf.pdf", company, title, "ya mama", start_date, end_date, data)
+report = Report('0000')
+report.create_user_specific_pdf("basic_report", company, title, start_date, end_date, "aung ball", 1234)
+report.download_pdf("basic_report")
 
 print("PDF created successfully!")
