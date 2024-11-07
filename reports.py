@@ -79,12 +79,13 @@ class Report():
         # Save the PDF
         c.save()
 
-    def create_detailed_pdf(self, file_name, company_name, title, username, start_date, end_date, data):
+    def create_detailed_pdf(self, file_name, company_name, title, username,
+                            start_date, end_date, data):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
         page_num = 1
-        y_pos = 625
+        y_pos = 605
 
         # Set up the canvas
         c = canvas.Canvas(file_name, pagesize=letter)
@@ -101,17 +102,19 @@ class Report():
 
         # Username
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(30, 670, username)
+        c.drawString(30, 662, username)
 
         # Header
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(75, 650, 'Employee')
-        c.drawString(320, 650, 'Hours:Minutes')
+        c.drawString(75, 630, 'Date')
+        c.drawString(200, 630, 'Time(in)')
+        c.drawString(325, 630, 'Time(out)')
+        c.drawString(430, 630, 'Hours:Minutes')
 
         # Draw the horizontal line below the header
         c.setStrokeColorRGB(0, 0, 0)
         c.setLineWidth(2)
-        c.line(65, 645, 525, 645)
+        c.line(65, 622, 525, 622)
 
         total_pages = self.calculate_pages()
 
@@ -121,7 +124,8 @@ class Report():
         c.drawString(30, 30, current_time)
 
         # Loop through all names and total minutes
-        for i, (name, time) in enumerate(zip(data['names'], data['times'])):
+        for i, (date, clock_in, clock_out, total_time) in enumerate(
+                zip(data['date'], data['clock_in'], data['clock_out'], data['times'])):
             if y_pos < 70:
                 # Create new page and add page number at the bottom
                 c.showPage()
@@ -135,8 +139,10 @@ class Report():
                 y_pos = 730
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
-            c.drawString(80, y_pos, name)
-            c.drawString(370, y_pos, time)
+            c.drawString(75, y_pos, date)
+            c.drawRightString(245, y_pos, clock_in)
+            c.drawRightString(375, y_pos, clock_out)
+            c.drawString(460, y_pos, total_time)
             y_pos -= 16
 
         # Save the PDF
