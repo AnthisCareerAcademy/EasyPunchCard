@@ -10,18 +10,13 @@ class Report():
         self.access = SqlAccess(unique_id)
 
     @staticmethod
-    def calculate_pages(data):
+    def calculate_number_of_pages(data):
         """
-        Simulated for loop counter (for total page count)
+        Calculating number of pages the report will have
         """
-        fake_y_pos = 615
-        total_pages = 1
-        for i in range(len(data)):
-            if fake_y_pos < 40:
-                total_pages += 1
-                fake_y_pos = 730
-            fake_y_pos -= 16
-        return total_pages
+        items_per_page = (615 - 40) // 16
+        total_pages = (len(data) + items_per_page - 1) // items_per_page
+        return total_pages + 1
 
     def create_basic_pdf(self, file_name, company_name, title, start_date, end_date):
         # Initialize necessary variables
@@ -55,7 +50,7 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 645, 525, 645)
 
-        total_pages = self.calculate_pages(data)
+        total_pages = self.calculate_number_of_pages(data)
 
         # First page set up
         c.setFont("Helvetica", 10)
@@ -122,7 +117,7 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 622, 525, 622)
 
-        total_pages = self.calculate_pages(data)
+        total_pages = self.calculate_number_of_pages(data)
 
         # First page set up
         c.setFont("Helvetica", 10)
