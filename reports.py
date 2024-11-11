@@ -151,15 +151,3 @@ class Report():
     def download_pdf(self, file_name):
         if os.name == "nt":
             os.startfile(file_name)
-
-# Hardcode info for now
-company = "Anthis Cosmetology"
-title = "Time Clock Total Report"
-start_date = "05/15/2024"
-end_date = "06/20/2024"
-# Create the PDF
-report = Report('0000')
-report.create_user_specific_pdf("basic_report", company, title, start_date, end_date, "aung ball", 1234)
-report.download_pdf("basic_report")
-
-print("PDF created successfully!")
