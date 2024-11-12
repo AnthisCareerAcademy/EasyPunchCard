@@ -162,7 +162,7 @@ cython_debug/
 .idea/
 
 # database
-.db
+*.db
 
 # excel
 .xls
