@@ -365,7 +365,7 @@ class GUI:
         edit_employee_button: tk.Button = tk.Button(
             self.employee_management_frame,
             text="Edit Employee",
-            command=lambda: self.open_edit_employee_window(editing=0),
+            command=lambda: self.open_select_employee_window(),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -379,7 +379,7 @@ class GUI:
         add_employee_button: tk.Button = tk.Button(
             self.employee_management_frame,
             text="Add Employee",
-            command=lambda: self.open_edit_employee_window(editing=0), # Needs to be edited
+            command=lambda: self.open_select_employee_window(),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -393,7 +393,7 @@ class GUI:
         remove_employee_button: tk.Button = tk.Button(
             self.employee_management_frame,
             text="Remove Employee",
-            command=lambda: self.open_edit_employee_window(editing=0),
+            command=lambda: self.open_select_employee_window(),
             # Needs to be edited
             bg="#8B0000",
             fg="white",
@@ -472,21 +472,27 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def open_edit_employee_window(self, editing: int):
+    def open_edit_employee_window(self):
         """
         Opens a new window to edit employee details
         :return None:
         """
-        if self.edit_window is None:
-            self.edit_window = tk.Toplevel(self.admin_frame)
-            self.edit_window.title("Edit Employee")
-            self.edit_window.geometry("600x400")
+
+    def open_select_employee_window(self):
+        """
+        Opens a new window to select an employee before editing it
+        :return None:
+        """
+        if self.select_window is None:
+            self.select_window = tk.Toplevel(self.admin_frame)
+            self.select_window.title("Choose Employee")
+            self.select_window.geometry("600x400")
 
             # Creates a pop-up window to edit employee's details
             # edit_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
 
             # Title label
-            employee_label = ttk.Label(self.edit_window,
+            employee_label = ttk.Label(self.select_window,
                                        text="Choose an Employee",
                                        font=("Roboto", 20, "bold"))
             employee_label.pack()
@@ -503,7 +509,7 @@ class GUI:
 
             # Sets up a dropdown of the employees
             employee_combobox: ttk.Combobox = ttk.Combobox(
-                self.edit_window,
+                self.select_window,
                 values=[*list(employees_credentials.keys())],
                 font=("Roboto", 20),
             )
@@ -524,7 +530,7 @@ class GUI:
 
             # Set up the select button
             select_button: tk.Button = tk.Button(
-                self.edit_window,
+                self.select_window,
                 text="Select",
                 command=handle_selection,  # Causes an error
                 bg="#00796B",
@@ -535,12 +541,9 @@ class GUI:
 
             select_button.pack(pady=30)
         else:
-            self.edit_window.destroy()
-            self.edit_window = None
-            self.open_edit_employee_window(editing=0)
-
-    def open_select_employee_window(self):
-        pass
+            self.select_window.destroy()
+            self.select_window = None
+            self.open_select_employee_window()
 
     def open_reports_window(self):
         """
@@ -609,7 +612,7 @@ class GUI:
         """
 
         employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        self.open_edit_employee_window(editing=1)
+        self.open_edit_employee_window()
         print(employee)
     # ----------------------------------------------------
 
