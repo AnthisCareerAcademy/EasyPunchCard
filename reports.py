@@ -8,6 +8,9 @@ from database import SqlAccess
 class Report():
     def __init__(self, unique_id):
         self.access = SqlAccess(unique_id)
+        self.directory = "Reports"
+        if not os.path.exists(self.directory):
+            os.makedirs(self.directory)
 
     @staticmethod
     def calculate_number_of_pages(data):
@@ -28,7 +31,7 @@ class Report():
         print(data)
 
         # Set up the canvas
-        c = canvas.Canvas(file_name, pagesize=letter)
+        c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)
 
         # Title
         c.setFont("Helvetica-Bold", 16)
@@ -80,7 +83,7 @@ class Report():
         c.save()
 
     def create_user_specific_pdf(self, file_name, company_name, title,
-                            start_date, end_date, name, student_id):
+                                 start_date, end_date, name, student_id):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
@@ -89,7 +92,7 @@ class Report():
         data = self.access.admin_read_self_table(student_id)
 
         # Set up the canvas
-        c = canvas.Canvas(file_name, pagesize=letter)
+        c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)
 
         # Title
         c.setFont("Helvetica-Bold", 16)
@@ -148,6 +151,6 @@ class Report():
         # Save the PDF
         c.save()
 
-    def download_pdf(self, file_name):
+    def download_pdf(self, path):
         if os.name == "nt":
-            os.startfile(file_name)
+            os.startfile(path)
