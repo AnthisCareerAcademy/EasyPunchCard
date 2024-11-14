@@ -3,6 +3,7 @@ from reportlab.pdfgen import canvas
 from datetime import datetime
 import os
 from database import SqlAccess
+import subprocess
 
 
 class Report():
@@ -152,5 +153,4 @@ class Report():
         c.save()
 
     def download_pdf(self, path):
-        if os.name == "nt":
-            os.startfile(path)
+        subprocess.Popen(f'explorer /select,"{path}"')
