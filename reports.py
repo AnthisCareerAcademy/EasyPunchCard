@@ -18,7 +18,7 @@ class Report():
         total_pages = (len(data) + items_per_page - 1) // items_per_page
         return total_pages + 1
 
-    def create_basic_pdf(self, file_name, company_name, title, start_date, end_date):
+    def create_class_pdf(self, file_name, company_name, title, start_date, end_date):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
