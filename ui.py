@@ -533,7 +533,7 @@ class GUI:
 
             # Temporary access to admin panel
             if self.pin.get() == "0000":
-                self.current_user = User(self.pin.get(), {"admin_status": 1})
+                self.current_user = User(self.pin.get())
                 # self.current_user.access.add_user(1010, "luis", 0)
                 # self.current_user.access.add_user(2020, "jackson", 0)
                 # self.current_user.access.add_user(3030, "aung", 0)
@@ -545,7 +545,7 @@ class GUI:
 
                 # Checks if the credentials are in the database
                 try:
-                    self.current_user = User(self.pin.get(), {"admin_status": 0})
+                    self.current_user = User(self.pin.get())
                     if self.current_user.access.get_data_all_users("working_status") == 1:
                         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
                     else:
