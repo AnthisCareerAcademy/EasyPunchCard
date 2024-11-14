@@ -13,7 +13,6 @@ class Clock:
 
 
     def clock_in(self):
-        #TODO: make it so you can't clock in if you're already clocked in
         conn = self.access.get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT working_status FROM all_users WHERE student_id = ?", (self.id,))
