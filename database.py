@@ -4,25 +4,20 @@ from pandas import read_sql_query
 class SqlAccess:
     """
     Allows the User Class to connect to the EasyPunchCard database. 
-    Creates table, allows all users to add themself, and allows admins reads data.
     """
-    def __init__(self, student_id:str, admin_status:int=None):
+    def __init__(self, student_id:str):
         self.create_table()
         self.student_id = student_id
         self.exists = self.user_exists()
         if self.exists:
             # check if user exists
-            conn = self.get_db()
-            cursor = conn.cursor()
-            cursor.execute("SELECT admin_status FROM all_users WHERE student_id = ?", (self.student_id,))
-            self.admin_status = cursor.fetchone()[0]
-            cursor.close()
-            conn.close()
+            with self.get_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT admin_status FROM all_users WHERE student_id = ?", (self.student_id,))
+                self.admin_status = cursor.fetchone()[0]
         else:
-            if admin_status in [0, 1]:
-                self.admin_status = admin_status
-            else:
-                raise ValueError("User does not exist and no correct data provided for admin_status")
+            # if the user doesn't exist, raise an error
+            raise ValueError("User does not exist")
         
 
     @staticmethod
