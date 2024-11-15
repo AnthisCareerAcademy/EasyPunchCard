@@ -29,18 +29,21 @@ class GUI:
         self.clock_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.admin_frame: ttk.Frame = ttk.Frame(self.root)
         self.reports_frame: ttk.Frame = ttk.Frame(self.root)
+        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root)
 
         # A list of the current frames
         self.frames: list[str: ttk.Frame] = {
             "log_in_frame": self.log_in_frame,
             "clock_in_frame": self.clock_in_frame,
             "admin_frame": self.admin_frame,
-            "reports_frame": self.reports_frame
+            "reports_frame": self.reports_frame,
+            "employee_management_frame": self.employee_management_frame
         }
 
         # Admin Windows
-        self.select_window: None | tk.Toplevel = None
-        self.edit_window: None | tk.Toplevel = None
+        self.select_employee_window: None | tk.Toplevel = None
+        self.edit_employee_window: None | tk.Toplevel = None
+        self.add_employee_window: None | tk.Toplevel = None
 
         # Start The Program with the log in screen
         self.create_log_in_screen()
@@ -295,10 +298,12 @@ class GUI:
         # ----------------------------------------------------------------------------------------------
 
         # Configure and pack the edit button ------------
-        edit_button: tk.Button = tk.Button(
+        manage_employee_button: tk.Button = tk.Button(
             self.admin_frame,
-            text="Edit Employee",
-            command=lambda: self.open_edit_employee_window(editing=0),
+            text="Employee Management",
+            command=lambda: self.show(self.employee_management_frame,
+                                      "employee_management_frame",
+                                      self.create_employee_management_screen),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -307,7 +312,7 @@ class GUI:
             cursor="hand2"
         )
 
-        edit_button.pack(anchor="center", pady=10)
+        manage_employee_button.pack(anchor="center", pady=10)
         # ------------------------------------------------
 
         # Configure and pack the reports button ------------
@@ -341,7 +346,82 @@ class GUI:
         log_out_button.pack(anchor="center", pady=10)
         # ----------------------------------------------------------
 
-    # -------------------------------------------------------------------------------
+    def create_employee_management_screen(self):
+        """
+        Creates and configures the elements needed for the window
+        :return None
+        """
+
+        # Title -------------------------------
+        title_label: ttk.Label = ttk.Label(
+            self.employee_management_frame,
+            text="Employee Management",
+            font=("Roboto", 60, "bold"),
+            foreground="#00796B"
+        )
+        title_label.pack()
+        # -------------------------------------
+
+        # Management buttons -----------------------------------------------
+        edit_employee_button: tk.Button = tk.Button(
+            self.employee_management_frame,
+            text="Edit Employee",
+            command=lambda: self.open_select_employee_window(),
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 36, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+        )
+
+        edit_employee_button.pack(anchor="center", pady=50)
+
+        add_employee_button: tk.Button = tk.Button(
+            self.employee_management_frame,
+            text="Add Employee",
+            command=lambda: self.open_select_employee_window(),
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 36, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        )
+
+        add_employee_button.pack(anchor="center", pady=10)
+
+        remove_employee_button: tk.Button = tk.Button(
+            self.employee_management_frame,
+            text="Remove Employee",
+            command=lambda: self.open_select_employee_window(),
+            # Needs to be edited
+            bg="#8B0000",
+            fg="white",
+            font=("Roboto", 36, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        )
+
+        remove_employee_button.pack(anchor="center", pady=50)
+
+    # --------------------------------------------------------------------------
+
+        # Log out button -----------------------------------------
+        back_button: tk.Button = tk.Button(
+            self.employee_management_frame,
+            text="Back",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            bg="#8B0000",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2", )
+
+        back_button.pack(side="bottom", anchor="sw")
+        # ----------------------------------------------------------
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
@@ -393,21 +473,34 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def open_edit_employee_window(self, editing: int):
+    def open_edit_employee_window(self):
         """
         Opens a new window to edit employee details
         :return None:
         """
-        if self.edit_window is None:
-            self.edit_window = tk.Toplevel(self.admin_frame)
-            self.edit_window.title("Edit Employee")
-            self.edit_window.geometry("600x400")
 
-            # Creates a pop-up window to edit employee's details
-            # edit_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
+    def open_add_employee_window(self):
+        """Creates the elements and the pop-up window needed
+        to add a new employee to the database"""
+
+        if self.add_employee_window is None:
+            # Configures the initial pop-up window
+            self.add_employee_window = tk.Toplevel(self.employee_management_frame)
+            self.add_employee_window.title("Add Employee")
+            self.add_employee_window.geometry("600x400")
+
+    def open_select_employee_window(self):
+        """
+        Opens a new window to select an employee before editing it
+        :return None:
+        """
+        if self.select_employee_window is None:
+            self.select_employee_window = tk.Toplevel(self.admin_frame)
+            self.select_employee_window.title("Choose Employee")
+            self.select_employee_window.geometry("600x400")
 
             # Title label
-            employee_label = ttk.Label(self.edit_window,
+            employee_label = ttk.Label(self.select_employee_window,
                                        text="Choose an Employee",
                                        font=("Roboto", 20, "bold"))
             employee_label.pack()
@@ -424,7 +517,7 @@ class GUI:
 
             # Sets up a dropdown of the employees
             employee_combobox: ttk.Combobox = ttk.Combobox(
-                self.edit_window,
+                self.select_employee_window,
                 values=[*list(employees_credentials.keys())],
                 font=("Roboto", 20),
             )
@@ -445,7 +538,7 @@ class GUI:
 
             # Set up the select button
             select_button: tk.Button = tk.Button(
-                self.edit_window,
+                self.select_employee_window,
                 text="Select",
                 command=handle_selection,  # Causes an error
                 bg="#00796B",
@@ -456,12 +549,9 @@ class GUI:
 
             select_button.pack(pady=30)
         else:
-            self.edit_window.destroy()
-            self.edit_window = None
-            self.open_edit_employee_window(editing=0)
-
-    def open_select_employee_window(self):
-        pass
+            self.select_employee_window.destroy()
+            self.select_employee_window = None
+            self.open_select_employee_window()
 
     def open_reports_window(self):
         """
@@ -519,6 +609,19 @@ class GUI:
 
     def print_report(self):
         pass
+
+    def employee_selected(self, emp_id: str, window=0, constructor=0):
+        """
+        Makes a call to the database, using a specific user credentials
+        :param emp_id: credential connected to the employee in the database (4-digits)
+        :param window: parent window
+        :param constructor: Method used to create the screen
+        :return: None
+        """
+
+        employee = self.current_user.access.admin_get_row_all_users(emp_id)
+        self.open_edit_employee_window()
+        print(employee)
     # ----------------------------------------------------
 
     # Backend functions
@@ -570,19 +673,6 @@ class GUI:
         self.current_user = None
         self.pin.set("")
         self.show(self.log_in_frame, "log_in_frame", self.create_log_in_screen)
-
-    def employee_selected(self, emp_id: str, window=0, constructor=0):
-        """
-        Makes a call to the database, using a specific user credentials
-        :param emp_id: credential connected to the employee in the database (4-digits)
-        :param window: parent window
-        :param constructor: Method used to create the screen
-        :return: None
-        """
-
-        employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        self.open_edit_employee_window(editing=1)
-        print(employee)
 
     # Extra functions
     def exit_fullscreen(self):
