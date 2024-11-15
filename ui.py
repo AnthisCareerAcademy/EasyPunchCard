@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-
+from functools import partial
 from User import User
 
 class GUI:
@@ -558,57 +558,102 @@ class GUI:
         Opens a new window to view and print reports
         :return None:
         """
-
-        # Create the pop-up window ------------------------------------
+        # Create the pop-up window for class reports------------------------------------
         report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        report_window.title("Reports")
+        report_window.title("Class Reports")
         report_window.geometry("500x400")
-        # --------------------------------------------------------------
 
-        # Range of dates ----------------------------------------------
-        range_label: ttk.Label = ttk.Label(
+        # file name text input
+        file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        file_name_label.pack(pady=5)
+        file_name: tk.Entry = tk.Entry(report_window, width=20)
+        file_name.pack(pady=5)
+
+        # company name text input
+        company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        company_name_label.pack(pady=5)
+        company_name: tk.Entry = tk.Entry(report_window, width=20)
+        company_name.pack(pady=5)
+
+        # title text input
+        title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        title_label.pack(pady=5)
+        title_name: tk.Entry = tk.Entry(report_window, width=20)
+        title_name.pack(pady=5)
+
+        # TODO: add calender for the date selection
+
+        # Print big report button
+        print_class_button: tk.Button = tk.Button(
             report_window,
-            text="Specify Date Range",
-            font=("Roboto", 12)
-        )
-
-        range_label.pack(pady=10)
-
-        start_date: tk.Entry = tk.Entry(report_window, width=20)
-        start_date.pack(pady=5)
-
-        end_date: tk.Entry = tk.Entry(report_window, width=20)
-        end_date.pack(pady=5)
-        # ---------------------------------------------------------------
-
-        # Employee selection --------------------------------------
-        employee_label: ttk.Label = ttk.Label(
-            report_window,
-            text="Select Employee",
-            font=("Roboto", 12))
-
-        employee_label.pack(pady=10)
-
-        employee_combobox: ttk.Combobox = ttk.Combobox(
-            report_window,
-            values=["All Employees", "johndoe", "Luis"])
-
-        employee_combobox.pack(pady=5)
-        # -----------------------------------------------------------
-
-        # Print button
-        print_button: tk.Button = tk.Button(
-            report_window,
-            text="Print Report",
-            command=self.print_report,
+            text="Print All Users Report",
+            command=lambda: self.print_class_report(file_name.get(), company_name.get(), title_name.get(), "11-11-24", "11-16-24"),
             bg="#00796B",
             fg="white", font=("Roboto", 12, "bold"),
             relief="flat", bd=0)
+        print_class_button.pack(pady=20)
+        # --------------------------------------------------------------
 
-        print_button.pack(pady=20)
 
-    def print_report(self):
-        pass
+        # Create the pop-up window for small reports------------------------------------
+        report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
+        report_window.title("User Reports")
+        report_window.geometry("500x400")
+
+                # file name text input
+        file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        file_name_label.pack(pady=5)
+        file_name: tk.Entry = tk.Entry(report_window, width=20)
+        file_name.pack(pady=5)
+
+        # company name text input
+        company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        company_name_label.pack(pady=5)
+        company_name: tk.Entry = tk.Entry(report_window, width=20)
+        company_name.pack(pady=5)
+
+        # title text input
+        title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        title_label.pack(pady=5)
+        title_name: tk.Entry = tk.Entry(report_window, width=20)
+        title_name.pack(pady=5)
+
+        # student dropdown
+        employee_label: ttk.Label = ttk.Label(report_window, text="Select Employee", font=("Roboto", 12))
+        employee_label.pack(pady=10)
+
+        all_users = self.current_user.access.admin_read_all_users()
+        values = {}
+        for user in all_users:
+            values[user[1]] = user[0]
+
+        employee_combobox: ttk.Combobox = ttk.Combobox(
+            report_window,
+            values=list(values))
+        
+        employee_combobox.pack(pady=5)
+
+        # print small report button
+        print_specific_user_button: tk.Button = tk.Button(
+            report_window,
+            text="Print Specific User Report",
+            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), "11-11-24", "11-16-24", employee_combobox.get(), str(values[employee_combobox.get()])),
+            bg="#00796B",
+            fg="white", font=("Roboto", 12, "bold"),
+            relief="flat", bd=0)
+        print_specific_user_button.pack(pady=20)
+
+        # --------------------------------------------------------------
+
+    def print_class_report(self, file_name, company_name, title, start_date, end_date):
+        print(file_name, "printed")
+        self.current_user.report.create_class_pdf(file_name, company_name, title, start_date, end_date)
+        self.current_user.report.download_pdf("downloads")
+
+    def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
+        print(file_name, "printed")
+        self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
+        self.current_user.report.download_pdf("downloads")
 
     def employee_selected(self, emp_id: str, window=0, constructor=0):
         """
