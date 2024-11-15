@@ -41,8 +41,9 @@ class GUI:
         }
 
         # Admin Windows
-        self.select_window: None | tk.Toplevel = None
-        self.edit_window: None | tk.Toplevel = None
+        self.select_employee_window: None | tk.Toplevel = None
+        self.edit_employee_window: None | tk.Toplevel = None
+        self.add_employee_window: None | tk.Toplevel = None
 
         # Start The Program with the log in screen
         self.create_log_in_screen()
@@ -478,21 +479,28 @@ class GUI:
         :return None:
         """
 
+    def open_add_employee_window(self):
+        """Creates the elements and the pop-up window needed
+        to add a new employee to the database"""
+
+        if self.add_employee_window is None:
+            # Configures the initial pop-up window
+            self.add_employee_window = tk.Toplevel(self.employee_management_frame)
+            self.add_employee_window.title("Add Employee")
+            self.add_employee_window.geometry("600x400")
+
     def open_select_employee_window(self):
         """
         Opens a new window to select an employee before editing it
         :return None:
         """
-        if self.select_window is None:
-            self.select_window = tk.Toplevel(self.admin_frame)
-            self.select_window.title("Choose Employee")
-            self.select_window.geometry("600x400")
-
-            # Creates a pop-up window to edit employee's details
-            # edit_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
+        if self.select_employee_window is None:
+            self.select_employee_window = tk.Toplevel(self.admin_frame)
+            self.select_employee_window.title("Choose Employee")
+            self.select_employee_window.geometry("600x400")
 
             # Title label
-            employee_label = ttk.Label(self.select_window,
+            employee_label = ttk.Label(self.select_employee_window,
                                        text="Choose an Employee",
                                        font=("Roboto", 20, "bold"))
             employee_label.pack()
@@ -509,7 +517,7 @@ class GUI:
 
             # Sets up a dropdown of the employees
             employee_combobox: ttk.Combobox = ttk.Combobox(
-                self.select_window,
+                self.select_employee_window,
                 values=[*list(employees_credentials.keys())],
                 font=("Roboto", 20),
             )
@@ -530,7 +538,7 @@ class GUI:
 
             # Set up the select button
             select_button: tk.Button = tk.Button(
-                self.select_window,
+                self.select_employee_window,
                 text="Select",
                 command=handle_selection,  # Causes an error
                 bg="#00796B",
@@ -541,8 +549,8 @@ class GUI:
 
             select_button.pack(pady=30)
         else:
-            self.select_window.destroy()
-            self.select_window = None
+            self.select_employee_window.destroy()
+            self.select_employee_window = None
             self.open_select_employee_window()
 
     def open_reports_window(self):
