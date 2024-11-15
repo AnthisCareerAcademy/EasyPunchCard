@@ -49,7 +49,8 @@ class SqlAccess:
                     admin_status INT NOT NULL,
                     start_time TEXT,
                     working_status INT,
-                    total_minutes INT
+                    total_minutes INT,
+                    graduation_year INT
                 )
             ''')
             
