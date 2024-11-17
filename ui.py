@@ -352,76 +352,7 @@ class GUI:
         :return None
         """
 
-        # Title -------------------------------
-        title_label: ttk.Label = ttk.Label(
-            self.employee_management_frame,
-            text="Employee Management",
-            font=("Roboto", 60, "bold"),
-            foreground="#00796B"
-        )
-        title_label.pack()
-        # -------------------------------------
 
-        # Management buttons -----------------------------------------------
-        edit_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Edit Employee",
-            command=lambda: self.open_select_employee_window(),
-            bg="#00796B",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-        )
-
-        edit_employee_button.pack(anchor="center", pady=50)
-
-        add_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Add Employee",
-            command=lambda: self.open_select_employee_window(),
-            bg="#00796B",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        add_employee_button.pack(anchor="center", pady=10)
-
-        remove_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Remove Employee",
-            command=lambda: self.open_select_employee_window(),
-            # Needs to be edited
-            bg="#8B0000",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        remove_employee_button.pack(anchor="center", pady=50)
-
-    # --------------------------------------------------------------------------
-
-        # Log out button -----------------------------------------
-        back_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Back",
-            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
-            bg="#8B0000",
-            fg="white",
-            font=("Roboto", 30, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2", )
-
-        back_button.pack(side="bottom", anchor="sw")
-        # ----------------------------------------------------------
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
