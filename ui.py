@@ -354,7 +354,7 @@ class GUI:
 
         # Configuring the rows of the parent window
         self.employee_management_frame.rowconfigure(0, weight=6)  # Top space
-        self.employee_management_frame.rowconfigure(1, weight=6)  # center
+        self.employee_management_frame.rowconfigure(1, weight=6)  # Bottom Space
         self.employee_management_frame.rowconfigure(2, weight=2)  # Footer space
 
         # Configuring the columns of the parent window
@@ -512,6 +512,37 @@ class GUI:
 
         # Configure the columns of the radio buttons frame
         radio_buttons_frame.columnconfigure(0, weight=1)
+        radio_buttons_frame.columnconfigure(1, weight=1)
+        radio_buttons_frame.columnconfigure(2, weight=1)
+        radio_buttons_frame.columnconfigure(3, weight=1)
+
+        # Configuring the rows of the radio buttons frame
+        radio_buttons_frame.rowconfigure(0, weight=1)
+        radio_buttons_frame.rowconfigure(1, weight=1)
+        radio_buttons_frame.rowconfigure(2, weight=1)
+
+        # Variable that will hold the admin status value
+        admin_status_variable: tk.StringVar = tk.StringVar(value="no")
+
+        # Admin status radiobuttons
+        admin_yes: tk.Radiobutton = tk.Radiobutton(
+            radio_buttons_frame,
+            text="Yes",
+            value="yes",
+            font=("Roboto", 15),
+            variable=admin_status_variable,
+        )
+
+        admin_no: tk.Radiobutton = tk.Radiobutton(
+            radio_buttons_frame,
+            text="No",
+            value="no",
+            font=("Roboto", 15),
+            variable=admin_status_variable,
+        )
+
+        admin_yes.grid(row=1, column=0)
+        admin_no.grid(row=1, column=1)
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
