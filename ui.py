@@ -29,7 +29,7 @@ class GUI:
         self.clock_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.admin_frame: ttk.Frame = ttk.Frame(self.root)
         self.reports_frame: ttk.Frame = ttk.Frame(self.root)
-        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root)
+        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root, borderwidth=5, relief="solid")
 
         # A list of the current frames
         self.frames: list[str: ttk.Frame] = {
@@ -352,7 +352,166 @@ class GUI:
         :return None
         """
 
+        # Configuring the rows of the parent window
+        self.employee_management_frame.rowconfigure(0, weight=6)  # Top space
+        self.employee_management_frame.rowconfigure(1, weight=6)  # center
+        self.employee_management_frame.rowconfigure(2, weight=2)  # Footer space
 
+        # Configuring the columns of the parent window
+        self.employee_management_frame.columnconfigure(0, weight=1)  # Left space
+        self.employee_management_frame.columnconfigure(1, weight=2)  # Center space
+        self.employee_management_frame.columnconfigure(2, weight=1)  # Right space
+
+        # Frame that will be on the higher side of the screen
+        top_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            borderwidth=5,
+            relief="solid"
+
+        )
+        top_frame.grid(row=0, column=1, sticky="nsew")
+        top_frame.grid_propagate(False)
+
+        # Configuring the columns of the top child window
+        top_frame.columnconfigure(0, weight=1)
+        top_frame.columnconfigure(1, weight=1)
+        top_frame.columnconfigure(2, weight=1)
+        top_frame.columnconfigure(3, weight=1)
+        top_frame.columnconfigure(4, weight=1)
+        top_frame.columnconfigure(5, weight=1)
+        top_frame.columnconfigure(6, weight=1)
+
+        # Configuring the rows of the top child window
+        top_frame.rowconfigure(0, weight=2)
+        top_frame.rowconfigure(1, weight=1)
+        top_frame.rowconfigure(2, weight=1)
+        top_frame.rowconfigure(3, weight=1)
+        top_frame.rowconfigure(4, weight=1)
+        top_frame.rowconfigure(5, weight=1)
+        top_frame.rowconfigure(6, weight=5)
+
+        # title label
+        title_label: ttk.Label = ttk.Label(
+            top_frame,
+            text="Employee Management",
+            font=("Roboto", 50, "bold"),
+            foreground="#00796B"
+        )
+
+        title_label.grid(row=0, column=0, columnspan=6)
+
+        # Dropdown of the available employees
+        select_employee_dropdown: ttk.Combobox = ttk.Combobox(
+            top_frame,
+            values=["Luis Velasquez", "Jackson", "Aung"],
+            font=("Roboto", 25, "bold")
+        )
+
+        select_employee_dropdown.grid(
+            row=2, column=0,
+            sticky="new",
+            columnspan=6
+        )
+
+        # Button used to select an employee
+        select_button: tk.Button = tk.Button(
+            top_frame,
+            text="Select",
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        )
+
+        select_button.grid(row=3, column=1, columnspan=4, sticky="ew")
+
+        # Frame that will be on the lower side of the screen
+        bottom_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            borderwidth=5,
+            relief="solid"
+        )
+
+        bottom_frame.grid(row=1, column=1, sticky="nsew")
+        bottom_frame.grid_propagate(False)
+
+        # Configures the rows of the bottom child frame
+        bottom_frame.rowconfigure(0, weight=1)
+        bottom_frame.rowconfigure(1, weight=1)
+        bottom_frame.rowconfigure(2, weight=5)
+
+        # Configures the columns of the bottom child frame
+        bottom_frame.columnconfigure(0, weight=3)
+        bottom_frame.columnconfigure(1, weight=1)
+        bottom_frame.columnconfigure(2, weight=3)
+
+        # TextBoxes
+        pin_entry = ttk.Entry(
+            bottom_frame,
+            font=("Roboto", 20),
+        )
+
+        # Textbox in which the student's PIN will be hosted
+        pin_entry.insert(0, "PIN")  # Prepopulate with "PIN"
+        pin_entry.grid(row=0, column=0, sticky="nsew", pady=5)
+
+        # Textbox in which the student's username will be hosted
+        username_entry = ttk.Entry(
+            bottom_frame,
+            font=("Roboto", 20)
+        )
+        username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
+        username_entry.grid(row=0, column=2, sticky="nsew", pady=5)
+
+        # Frame that will host the back button
+        back_button_frame: ttk.Frame = ttk.Frame(self.employee_management_frame, borderwidth=5, relief="solid")
+        back_button_frame.grid(row=2, column=0, sticky="nsew")
+        back_button_frame.grid_propagate(False)
+
+        # configures the rows of the back button frame
+        back_button_frame.rowconfigure(0, weight=1)
+        back_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the back button frame
+        back_button_frame.columnconfigure(0, weight=1)
+        back_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the admin back to the admin panel
+        back_button: tk.Button = tk.Button(
+            back_button_frame,
+            text="Back",
+            bg="#8B0000",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        back_button.grid(row=1, column=0, sticky="nsew")
+
+        # Admin label
+        admin_label: ttk.Label = ttk.Label(
+            bottom_frame,
+            text="Admin Status",
+            font=("Roboto", 15, "bold")
+        )
+
+        admin_label.grid(row=1, column=0)
+
+        # Frame that will host the radio buttons along with their labels
+        radio_buttons_frame: ttk.Frame = ttk.Frame(
+            bottom_frame,
+            borderwidth=5,
+            relief="solid"
+        )
+        radio_buttons_frame.grid(row=1, column=2, sticky="nsew")
+        radio_buttons_frame.grid_propagate(False)
+
+        # Configure the columns of the radio buttons frame
+        radio_buttons_frame.columnconfigure(0, weight=1)
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
@@ -586,7 +745,7 @@ class GUI:
                         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
 
                 # Warns the user if the credentials are incorrect
-                except TypeError:
+                except ValueError:
                     messagebox.showwarning("User Error", "User does not exist")
                     self.pin.set("")
         else:
