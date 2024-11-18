@@ -22,6 +22,8 @@ class GUI:
         # Create a variable for the current User
         self.current_user: User | None = None
 
+        self.admin_status: tk.IntVar = tk.IntVar(value=0)
+
         # Create frames for different sections
         self.nav_frame: ttk.Frame = ttk.Frame(self.root)
 
@@ -354,7 +356,7 @@ class GUI:
 
         # Configuring the rows of the parent window
         self.employee_management_frame.rowconfigure(0, weight=6)  # Top space
-        self.employee_management_frame.rowconfigure(1, weight=6)  # Bottom Space
+        self.employee_management_frame.rowconfigure(1, weight=6)  # Center Space
         self.employee_management_frame.rowconfigure(2, weight=2)  # Footer space
 
         # Configuring the columns of the parent window
@@ -465,33 +467,6 @@ class GUI:
         username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
         username_entry.grid(row=0, column=2, sticky="nsew", pady=5)
 
-        # Frame that will host the back button
-        back_button_frame: ttk.Frame = ttk.Frame(self.employee_management_frame, borderwidth=5, relief="solid")
-        back_button_frame.grid(row=2, column=0, sticky="nsew")
-        back_button_frame.grid_propagate(False)
-
-        # configures the rows of the back button frame
-        back_button_frame.rowconfigure(0, weight=1)
-        back_button_frame.rowconfigure(1, weight=1)
-
-        # configures the columns of the back button frame
-        back_button_frame.columnconfigure(0, weight=1)
-        back_button_frame.columnconfigure(1, weight=1)
-
-        # Button that takes the admin back to the admin panel
-        back_button: tk.Button = tk.Button(
-            back_button_frame,
-            text="Back",
-            bg="#8B0000",
-            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
-            fg="white",
-            font=("Roboto", 24, "bold"),
-            relief="flat",
-            cursor="hand2"
-        )
-
-        back_button.grid(row=1, column=0, sticky="nsew")
-
         # Admin label
         admin_label: ttk.Label = ttk.Label(
             bottom_frame,
@@ -513,36 +488,64 @@ class GUI:
         # Configure the columns of the radio buttons frame
         radio_buttons_frame.columnconfigure(0, weight=1)
         radio_buttons_frame.columnconfigure(1, weight=1)
-        radio_buttons_frame.columnconfigure(2, weight=1)
-        radio_buttons_frame.columnconfigure(3, weight=1)
 
         # Configuring the rows of the radio buttons frame
         radio_buttons_frame.rowconfigure(0, weight=1)
         radio_buttons_frame.rowconfigure(1, weight=1)
         radio_buttons_frame.rowconfigure(2, weight=1)
 
-        # Variable that will hold the admin status value
-        admin_status_variable: tk.StringVar = tk.StringVar(value="no")
-
         # Admin status radiobuttons
         admin_yes: tk.Radiobutton = tk.Radiobutton(
             radio_buttons_frame,
             text="Yes",
-            value="yes",
+            value=1,
             font=("Roboto", 15),
-            variable=admin_status_variable,
+            variable=self.admin_status,
+            borderwidth=3,
+            relief="solid"
         )
 
         admin_no: tk.Radiobutton = tk.Radiobutton(
             radio_buttons_frame,
             text="No",
-            value="no",
+            value=0,
             font=("Roboto", 15),
-            variable=admin_status_variable,
+            variable=self.admin_status,
+            borderwidth=3,
+            relief="solid"
         )
 
         admin_yes.grid(row=1, column=0)
         admin_no.grid(row=1, column=1)
+
+        # Frame that will host the back button
+        back_button_frame: ttk.Frame = ttk.Frame(self.employee_management_frame,
+                                                 borderwidth=5, relief="solid")
+        back_button_frame.grid(row=2, column=0, sticky="nsew")
+        back_button_frame.grid_propagate(False)
+
+        # configures the rows of the back button frame
+        back_button_frame.rowconfigure(0, weight=1)
+        back_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the back button frame
+        back_button_frame.columnconfigure(0, weight=1)
+        back_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the admin back to the admin panel
+        back_button: tk.Button = tk.Button(
+            back_button_frame,
+            text="Back",
+            bg="#8B0000",
+            command=lambda: self.show(self.admin_frame, "admin_frame",
+                                      self.create_admin_panel_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        back_button.grid(row=1, column=0, sticky="nsew")
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
