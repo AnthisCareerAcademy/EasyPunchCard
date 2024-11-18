@@ -518,6 +518,32 @@ class GUI:
         admin_yes.grid(row=1, column=0)
         admin_no.grid(row=1, column=1)
 
+        add_button: tk.Button = tk.Button(
+            bottom_frame,
+            text="Add",
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        )
+
+        add_button.grid(row=2, column=2, sticky="ew")
+
+        reset_button: tk.Button = tk.Button(
+            bottom_frame,
+            text="Reset",
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2"
+        )
+
+        reset_button.grid(row=2, column=0, sticky="ew")
+
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(self.employee_management_frame,
                                                  borderwidth=5, relief="solid")
@@ -537,8 +563,7 @@ class GUI:
             back_button_frame,
             text="Back",
             bg="#8B0000",
-            command=lambda: self.show(self.admin_frame, "admin_frame",
-                                      self.create_admin_panel_screen),
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
             fg="white",
             font=("Roboto", 24, "bold"),
             relief="flat",
