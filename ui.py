@@ -367,8 +367,8 @@ class GUI:
         # Frame that will be on the higher side of the screen
         top_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
 
         )
         top_frame.grid(row=0, column=1, sticky="nsew")
@@ -432,8 +432,8 @@ class GUI:
         # Frame that will be on the lower side of the screen
         bottom_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
         )
 
         bottom_frame.grid(row=1, column=1, sticky="nsew")
@@ -479,8 +479,8 @@ class GUI:
         # Frame that will host the radio buttons along with their labels
         radio_buttons_frame: ttk.Frame = ttk.Frame(
             bottom_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
         )
         radio_buttons_frame.grid(row=1, column=2, sticky="nsew")
         radio_buttons_frame.grid_propagate(False)
@@ -501,8 +501,8 @@ class GUI:
             value=1,
             font=("Roboto", 15),
             variable=self.admin_status,
-            borderwidth=3,
-            relief="solid"
+            # borderwidth=3,
+            # relief="solid"
         )
 
         admin_no: tk.Radiobutton = tk.Radiobutton(
@@ -511,16 +511,16 @@ class GUI:
             value=0,
             font=("Roboto", 15),
             variable=self.admin_status,
-            borderwidth=3,
-            relief="solid"
+            # borderwidth=3,
+            # relief="solid"
         )
 
         admin_yes.grid(row=1, column=0)
         admin_no.grid(row=1, column=1)
 
-        add_button: tk.Button = tk.Button(
+        update_button: tk.Button = tk.Button(
             bottom_frame,
-            text="Add",
+            text="Update",
             bg="#00796B",
             fg="white",
             font=("Roboto", 30, "bold"),
@@ -529,7 +529,7 @@ class GUI:
             cursor="hand2"
         )
 
-        add_button.grid(row=2, column=2, sticky="ew")
+        update_button.grid(row=2, column=2, sticky="ew")
 
         reset_button: tk.Button = tk.Button(
             bottom_frame,
@@ -545,8 +545,11 @@ class GUI:
         reset_button.grid(row=2, column=0, sticky="ew")
 
         # Frame that will host the back button
-        back_button_frame: ttk.Frame = ttk.Frame(self.employee_management_frame,
-                                                 borderwidth=5, relief="solid")
+        back_button_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
         back_button_frame.grid(row=2, column=0, sticky="nsew")
         back_button_frame.grid_propagate(False)
 
@@ -571,6 +574,37 @@ class GUI:
         )
 
         back_button.grid(row=1, column=0, sticky="nsew")
+
+        # Frame that will host the Add Employee button
+        add_employee_button_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
+        add_employee_button_frame.grid(row=2, column=2, sticky="nsew")
+        add_employee_button_frame.grid_propagate(False)
+
+        # configures the rows of the add_employee_button_frame
+        add_employee_button_frame.rowconfigure(0, weight=1)
+        add_employee_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the add_employee_button_frame
+        add_employee_button_frame.columnconfigure(0, weight=1)
+        add_employee_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the add employee window
+        add_employee_button: tk.Button = tk.Button(
+            add_employee_button_frame,
+            text="Add Employee",
+            bg="#06402B",
+            # command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        add_employee_button.grid(row=1, column=1, sticky="nsew")
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
