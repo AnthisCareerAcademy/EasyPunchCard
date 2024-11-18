@@ -22,7 +22,7 @@ class Report():
         total_pages = (len(data) + items_per_page - 1) // items_per_page
         return total_pages + 1
 
-    def create_class_pdf(self, file_name, company_name, title, start_date, end_date):
+    def create_class_pdf(self, file_name, company_name, title):
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
@@ -39,10 +39,6 @@ class Report():
         c.drawCentredString(306, 750, company_name)
         c.setFont("Helvetica-Oblique", 20)
         c.drawCentredString(306, 720, title)
-
-        # Date
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(30, 690, f"{start_date} - {end_date}")
 
         # Header
         c.setFont("Helvetica-Bold", 12)
