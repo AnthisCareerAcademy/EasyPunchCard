@@ -564,22 +564,22 @@ class GUI:
         report_window.geometry("500x400")
 
         # file name text input
-        file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
-        file_name_label.pack(pady=5)
-        file_name: tk.Entry = tk.Entry(report_window, width=20)
-        file_name.pack(pady=5)
+        class_file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        class_file_name_label.pack(pady=5)
+        class_file_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_file_name.pack(pady=5)
 
         # company name text input
-        company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
-        company_name_label.pack(pady=5)
-        company_name: tk.Entry = tk.Entry(report_window, width=20)
-        company_name.pack(pady=5)
+        class_company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        class_company_name_label.pack(pady=5)
+        class_company_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_company_name.pack(pady=5)
 
         # title text input
-        title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
-        title_label.pack(pady=5)
-        title_name: tk.Entry = tk.Entry(report_window, width=20)
-        title_name.pack(pady=5)
+        class_title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        class_title_label.pack(pady=5)
+        class_title_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_title_name.pack(pady=5)
 
         # TODO: add calender for the date selection
 
@@ -587,7 +587,7 @@ class GUI:
         print_class_button: tk.Button = tk.Button(
             report_window,
             text="Print All Users Report",
-            command=lambda: self.print_class_report(file_name.get(), company_name.get(), title_name.get(), "11-11-24", "11-16-24"),
+            command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get(), "11-11-24", "11-16-24"),
             bg="#00796B",
             fg="white", font=("Roboto", 12, "bold"),
             relief="flat", bd=0)
@@ -600,7 +600,7 @@ class GUI:
         report_window.title("User Reports")
         report_window.geometry("500x400")
 
-                # file name text input
+        # file name text input
         file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
         file_name_label.pack(pady=5)
         file_name: tk.Entry = tk.Entry(report_window, width=20)
@@ -646,14 +646,12 @@ class GUI:
         # --------------------------------------------------------------
 
     def print_class_report(self, file_name, company_name, title, start_date, end_date):
-        print(file_name, "printed")
+        """creates class report in a folder called Reports"""
         self.current_user.report.create_class_pdf(file_name, company_name, title, start_date, end_date)
-        self.current_user.report.download_pdf("downloads")
 
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
-        print(file_name, "printed")
+        """creates a user report in the same Reports folder"""
         self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
-        self.current_user.report.download_pdf("downloads")
 
     def employee_selected(self, emp_id: str, window=0, constructor=0):
         """
