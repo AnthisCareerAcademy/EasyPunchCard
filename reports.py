@@ -145,8 +145,11 @@ class Report():
             c.setFont("Helvetica", 12)
             c.drawString(75, y_pos, row[1])
             c.drawRightString(245, y_pos, row[2])
-            c.drawRightString(375, y_pos, row[3])
-            c.drawString(460, y_pos, row[4])
+            if row[3] == None:
+                c.drawRightString(375, y_pos, "N/A")
+            else:
+                c.drawRightString(375, y_pos, row[3])
+            c.drawString(460, y_pos, str(row[4]))
             y_pos -= 16
 
         # Save the PDF
