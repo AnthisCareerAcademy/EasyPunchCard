@@ -597,22 +597,6 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def open_edit_employee_window(self):
-        """
-        Opens a new window to edit employee details
-        :return None:
-        """
-
-    def open_add_employee_window(self):
-        """Creates the elements and the pop-up window needed
-        to add a new employee to the database"""
-
-        if self.add_employee_window is None:
-            # Configures the initial pop-up window
-            self.add_employee_window = tk.Toplevel(self.employee_management_frame)
-            self.add_employee_window.title("Add Employee")
-            self.add_employee_window.geometry("600x400")
-
     def open_select_employee_window(self):
         """
         Opens a new window to select an employee before editing it
@@ -744,7 +728,6 @@ class GUI:
         """
 
         employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        self.open_edit_employee_window()
         print(employee)
     # ----------------------------------------------------
 
