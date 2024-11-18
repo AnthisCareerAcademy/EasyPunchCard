@@ -1,7 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from functools import partial
+from tkinter import ttk, messagebox
 from User import User
 
 class GUI:
@@ -587,7 +585,7 @@ class GUI:
         print_class_button: tk.Button = tk.Button(
             report_window,
             text="Print All Users Report",
-            command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get(), "11-11-24", "11-16-24"),
+            command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get()),
             bg="#00796B",
             fg="white", font=("Roboto", 12, "bold"),
             relief="flat", bd=0)
@@ -645,9 +643,9 @@ class GUI:
 
         # --------------------------------------------------------------
 
-    def print_class_report(self, file_name, company_name, title, start_date, end_date):
+    def print_class_report(self, file_name, company_name, title):
         """creates class report in a folder called Reports"""
-        self.current_user.report.create_class_pdf(file_name, company_name, title, start_date, end_date)
+        self.current_user.report.create_class_pdf(file_name, company_name, title)
 
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
         """creates a user report in the same Reports folder"""
