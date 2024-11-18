@@ -1,5 +1,6 @@
 import sqlite3
 from pandas import read_sql_query
+from datetime import datetime
 
 class SqlAccess:
     """
@@ -49,7 +50,8 @@ class SqlAccess:
                     admin_status INT NOT NULL,
                     start_time TEXT,
                     working_status INT,
-                    total_minutes INT
+                    total_minutes INT,
+                    graduation_year INT
                 )
             ''')
             
@@ -60,9 +62,9 @@ class SqlAccess:
             # Insert the admin user only if they do not exist
             if not exists:
                 cursor.execute('''
-                    INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', ('0000', 'admin_user', 1, None, 0, 0))
+                    INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', ('0000', 'admin_user', 1, None, 0, 0, datetime.today().year))
             
             conn.commit()
 
@@ -95,7 +97,7 @@ class SqlAccess:
         cursor.close()
         conn.close()
 
-    def add_user(self, student_id:str, username:str, admin_status:int):
+    def add_user(self, student_id:str, username:str, admin_status:int, graduation_year: int):
         """
         allows admin users to add users to the database
         """
@@ -108,9 +110,9 @@ class SqlAccess:
             # user is not an admin
             if admin_status == 0:
                 cursor.execute('''
-                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
-                VALUES (?, ?, ?, NULL, 0, 0)
-                ''', (student_id, username, admin_status))
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
+                VALUES (?, ?, ?, NULL, 0, 0, ?)
+                ''', (student_id, username, admin_status, graduation_year))
 
                 cursor.execute(f'''
                                 CREATE TABLE IF NOT EXISTS user_{student_id} (
@@ -129,8 +131,8 @@ class SqlAccess:
             # user is an admin
             elif admin_status == 1:
                 cursor.execute('''
-                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
-                VALUES (?, ?, ?, NULL, 0, 0)
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
+                VALUES (?, ?, ?, NULL, 0, 0, 0000)
                 ''', (student_id, username, admin_status))
                 conn.commit()
                 cursor.close()
