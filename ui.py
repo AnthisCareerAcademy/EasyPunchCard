@@ -1,6 +1,8 @@
 import tkinter as tk
+from tkcalendar import Calendar
 from tkinter import ttk, messagebox
 from User import User
+from datetime import datetime, timedelta
 
 class GUI:
     def __init__(self):
@@ -557,33 +559,31 @@ class GUI:
         :return None:
         """
         # Create the pop-up window for class reports------------------------------------
-        report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        report_window.title("Class Reports")
-        report_window.geometry("500x400")
+        class_report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
+        class_report_window.title("Class Reports")
+        class_report_window.geometry("500x400")
 
         # file name text input
-        class_file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        class_file_name_label: ttk.Label = ttk.Label(class_report_window, text="File Name",font=("Roboto", 12))
         class_file_name_label.pack(pady=5)
-        class_file_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_file_name: tk.Entry = tk.Entry(class_report_window, width=20)
         class_file_name.pack(pady=5)
 
         # company name text input
-        class_company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        class_company_name_label: ttk.Label = ttk.Label(class_report_window, text="Company Name",font=("Roboto", 12))
         class_company_name_label.pack(pady=5)
-        class_company_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_company_name: tk.Entry = tk.Entry(class_report_window, width=20)
         class_company_name.pack(pady=5)
 
         # title text input
-        class_title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        class_title_label: ttk.Label = ttk.Label(class_report_window, text="Title Name",font=("Roboto", 12))
         class_title_label.pack(pady=5)
-        class_title_name: tk.Entry = tk.Entry(report_window, width=20)
+        class_title_name: tk.Entry = tk.Entry(class_report_window, width=20)
         class_title_name.pack(pady=5)
 
-        # TODO: add calender for the date selection
-
-        # Print big report button
+        # Print class report button
         print_class_button: tk.Button = tk.Button(
-            report_window,
+            class_report_window,
             text="Print All Users Report",
             command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get()),
             bg="#00796B",
@@ -596,11 +596,12 @@ class GUI:
         # Create the pop-up window for small reports------------------------------------
         report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
         report_window.title("User Reports")
-        report_window.geometry("500x400")
+        report_window.geometry("500x750")
 
         # file name text input
         file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
         file_name_label.pack(pady=5)
+
         file_name: tk.Entry = tk.Entry(report_window, width=20)
         file_name.pack(pady=5)
 
@@ -631,11 +632,51 @@ class GUI:
         
         employee_combobox.pack(pady=5)
 
-        # print small report button
+        # date range selection
+        self.cal = Calendar(report_window, selectmode='day', year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
+        self.cal.pack(pady=20)
+
+        self.start_date = None
+        self.end_date = None
+        
+        self.feedback_label = ttk.Label(report_window, text="")
+        self.feedback_label.pack(pady=10)
+
+        # start date button
+        start_date_button: tk.Button = tk.Button(
+            report_window, 
+            text="Set Start Date", 
+            command=self.set_start_date,
+            bg = "#00796B",
+            fg = "white",
+            font = ("Roboto", 12, "bold"),
+            relief = "flat",
+            bd = 0,
+            height = 1,
+            width = 15,
+            )
+        start_date_button.pack(pady=10)
+        
+        # end date button
+        end_date_button: tk.Button = tk.Button(
+            report_window, 
+            text="Set End Date", 
+            command=self.set_end_date,
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 12, "bold"),
+            relief="flat",
+            bd=0,
+            height=1,
+            width=15,
+            )
+        end_date_button.pack(pady=10)
+
+        # print specific user report button
         print_specific_user_button: tk.Button = tk.Button(
             report_window,
             text="Print Specific User Report",
-            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), "11-11-24", "11-16-24", employee_combobox.get(), str(values[employee_combobox.get()])),
+            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), self.start_date.strftime('%m-%d-%Y'), self.end_date.strftime('%m-%d-%Y'), employee_combobox.get(), str(values[employee_combobox.get()])),
             bg="#00796B",
             fg="white", font=("Roboto", 12, "bold"),
             relief="flat", bd=0)
@@ -650,6 +691,36 @@ class GUI:
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
         """creates a user report in the same Reports folder"""
         self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
+
+    def set_start_date(self):
+        self.start_date = datetime.strptime(self.cal.get_date(), "%m/%d/%y")
+        self.feedback_label.config(text=f"Start Date Set: {self.start_date.strftime('%Y-%m-%d')}")
+
+    # Function to update the end date
+    def set_end_date(self):
+        self.end_date = datetime.strptime(self.cal.get_date(), "%m/%d/%y")
+        self.feedback_label.config(text=f"End Date Set: {self.end_date.strftime('%Y-%m-%d')}")
+        if self.start_date and self.end_date:
+            self.highlight_range()
+
+    # Function to highlight the date range
+    def highlight_range(self):
+        try:
+            # Validate date range
+            if self.start_date > self.end_date:
+                raise ValueError("Start date must be before or equal to the end date!")
+            # Clear previous highlights
+            self.cal.calevent_remove('all')
+            # Highlight the new date range
+            current_date = self.start_date
+            while current_date <= self.end_date:
+                self.cal.calevent_create(current_date, "Range Highlight", "highlight")
+                current_date += timedelta(days=1)
+            # Configure the highlight appearance
+            self.cal.tag_config("highlight", background="lightblue", foreground="black")
+            self.feedback_label.config(text=f"Highlighted: {self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}")
+        except ValueError as e:
+            self.feedback_label.config(text=f"Error: {e}")
 
     def employee_selected(self, emp_id: str, window=0, constructor=0):
         """
