@@ -1,5 +1,5 @@
 import sqlite3
-
+from reports import Report
 from database import SqlAccess
 from Clock import Clock
 
@@ -12,9 +12,12 @@ class User:
         self.access = SqlAccess(unique_id)
         if self.access.exists:
             # if the user exists, give user access to clock class
-            if self.access.admin_status != 1:
+            if self.access.admin_status == 0:
                 # and if user isn't admin
                 self.clock = Clock(unique_id)
+            elif self.access.admin_status == 1:
+                # if admin
+                self.report = Report(unique_id)
 
     
     def __str__(self) -> str:
