@@ -448,8 +448,8 @@ class GUI:
 
         # Configures the columns of the bottom child frame
         bottom_frame.columnconfigure(0, weight=2)
-        bottom_frame.columnconfigure(1, weight=1)
-        bottom_frame.columnconfigure(2, weight=3)
+        bottom_frame.columnconfigure(1, weight=2)
+        bottom_frame.columnconfigure(2, weight=2)
 
         # Creates the calendar that will be used to edit the student's hours
         calendar = Calendar(
