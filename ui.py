@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkcalendar import Calendar
+from datetime import datetime
 
 from User import User
 
@@ -367,8 +369,8 @@ class GUI:
         # Frame that will be on the higher side of the screen
         top_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            # borderwidth=5,
-            # relief="solid"
+            borderwidth=5,
+            relief="solid"
 
         )
         top_frame.grid(row=0, column=1, sticky="nsew")
@@ -432,123 +434,42 @@ class GUI:
         # Frame that will be on the lower side of the screen
         bottom_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            # borderwidth=5,
-            # relief="solid"
+            borderwidth=5,
+            relief="solid"
         )
 
         bottom_frame.grid(row=1, column=1, sticky="nsew")
         bottom_frame.grid_propagate(False)
 
         # Configures the rows of the bottom child frame
-        bottom_frame.rowconfigure(0, weight=1)
+        bottom_frame.rowconfigure(0, weight=3)
         bottom_frame.rowconfigure(1, weight=1)
-        bottom_frame.rowconfigure(2, weight=5)
+        bottom_frame.rowconfigure(2, weight=2)
 
         # Configures the columns of the bottom child frame
-        bottom_frame.columnconfigure(0, weight=3)
+        bottom_frame.columnconfigure(0, weight=2)
         bottom_frame.columnconfigure(1, weight=1)
         bottom_frame.columnconfigure(2, weight=3)
 
-        # TextBoxes
-        pin_entry = ttk.Entry(
+        # Creates the calendar that will be used to edit the student's hours
+        calendar = Calendar(
             bottom_frame,
-            font=("Roboto", 20),
+            selectmode='day',
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            font=("Roboto", 12),
+            foreground = "white",
+            background="#00796B"
         )
-
-        # Textbox in which the student's PIN will be hosted
-        pin_entry.insert(0, "PIN")  # Prepopulate with "PIN"
-        pin_entry.grid(row=0, column=0, sticky="nsew", pady=5)
-
-        # Textbox in which the student's username will be hosted
-        username_entry = ttk.Entry(
-            bottom_frame,
-            font=("Roboto", 20)
-        )
-        username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
-        username_entry.grid(row=0, column=2, sticky="nsew", pady=5)
-
-        # Admin label
-        admin_label: ttk.Label = ttk.Label(
-            bottom_frame,
-            text="Admin Status",
-            font=("Roboto", 15, "bold")
-        )
-
-        admin_label.grid(row=1, column=0)
-
-        # Frame that will host the radio buttons along with their labels
-        radio_buttons_frame: ttk.Frame = ttk.Frame(
-            bottom_frame,
-            # borderwidth=5,
-            # relief="solid"
-        )
-        radio_buttons_frame.grid(row=1, column=2, sticky="nsew")
-        radio_buttons_frame.grid_propagate(False)
-
-        # Configure the columns of the radio buttons frame
-        radio_buttons_frame.columnconfigure(0, weight=1)
-        radio_buttons_frame.columnconfigure(1, weight=1)
-
-        # Configuring the rows of the radio buttons frame
-        radio_buttons_frame.rowconfigure(0, weight=1)
-        radio_buttons_frame.rowconfigure(1, weight=1)
-        radio_buttons_frame.rowconfigure(2, weight=1)
-
-        # Admin status radiobuttons
-        admin_yes: tk.Radiobutton = tk.Radiobutton(
-            radio_buttons_frame,
-            text="Yes",
-            value=1,
-            font=("Roboto", 15),
-            variable=self.admin_status,
-            # borderwidth=3,
-            # relief="solid"
-        )
-
-        admin_no: tk.Radiobutton = tk.Radiobutton(
-            radio_buttons_frame,
-            text="No",
-            value=0,
-            font=("Roboto", 15),
-            variable=self.admin_status,
-            # borderwidth=3,
-            # relief="solid"
-        )
-
-        admin_yes.grid(row=1, column=0)
-        admin_no.grid(row=1, column=1)
-
-        update_button: tk.Button = tk.Button(
-            bottom_frame,
-            text="Update",
-            bg="#00796B",
-            fg="white",
-            font=("Roboto", 30, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        update_button.grid(row=2, column=2, sticky="ew")
-
-        reset_button: tk.Button = tk.Button(
-            bottom_frame,
-            text="Reset",
-            bg="#00796B",
-            fg="white",
-            font=("Roboto", 30, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        reset_button.grid(row=2, column=0, sticky="ew")
+        calendar.grid(row=0, column=0, sticky="nsew")
+        print(calendar.get_date())
 
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            # borderwidth=5,
-            # relief="solid"
+            borderwidth=5,
+            relief="solid"
         )
         back_button_frame.grid(row=2, column=0, sticky="nsew")
         back_button_frame.grid_propagate(False)
@@ -578,8 +499,8 @@ class GUI:
         # Frame that will host the Add Employee button
         add_employee_button_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            # borderwidth=5,
-            # relief="solid"
+            borderwidth=5,
+            relief="solid"
         )
         add_employee_button_frame.grid(row=2, column=2, sticky="nsew")
         add_employee_button_frame.grid_propagate(False)
