@@ -87,6 +87,7 @@ class Report():
         page_num = 1
         y_pos = 605
         data = self.access.admin_read_self_table(student_id)
+        format_data = "%Y-%m-%d %H:%M:%S.%f"
 
         # Set up the canvas
         c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)
@@ -140,11 +141,15 @@ class Report():
             # Date, clock in time, clock out time, and total minutes
             c.setFont("Helvetica", 12)
             c.drawString(75, y_pos, row[1])
-            c.drawRightString(245, y_pos, row[2])
+            # Get the time in string and convert it to datetime
+            time_in = datetime.strptime(row[2], format_data)
+            c.drawRightString(245, y_pos, f"{time_in.hour}:{time_in.minute}")
             if row[3] == None:
                 c.drawRightString(375, y_pos, "N/A")
             else:
-                c.drawRightString(375, y_pos, row[3])
+                # Get the time out string and convert it to datetime
+                time_out = datetime.strptime(row[3], format_data)
+                c.drawRightString(375, y_pos, f"{time_out.hour}:{time_in.minute}")
             c.drawString(460, y_pos, str(row[4]))
             y_pos -= 16
 
@@ -153,3 +158,6 @@ class Report():
 
     def download_pdf(self, path):
         subprocess.Popen(f'explorer /select,"{path}"')
+
+report = Report('0000')
+report.create_user_specific_pdf('5', '5', '5', '5', '5 ', '5', '8008')
