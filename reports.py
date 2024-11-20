@@ -73,7 +73,9 @@ class Report():
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
             c.drawString(80, y_pos, row[1])
-            c.drawString(370, y_pos, str(row[-1]))
+            hours = row[-1] // 60
+            minutes = row[-1] % 60
+            c.drawCentredString(360, y_pos, f"{hours}:{minutes}")
             y_pos -= 16
 
         # Save the PDF
@@ -150,7 +152,9 @@ class Report():
                 # Get the time out string and convert it to datetime
                 time_out = datetime.strptime(row[3], format_data)
                 c.drawRightString(375, y_pos, f"{time_out.hour}:{time_in.minute}")
-            c.drawString(460, y_pos, str(row[4]))
+            hours = row[4] // 60
+            minutes = row[4] % 60
+            c.drawCentredString(468, y_pos, f"{hours}:{minutes}")
             y_pos -= 16
 
         # Save the PDF
@@ -158,6 +162,3 @@ class Report():
 
     def download_pdf(self, path):
         subprocess.Popen(f'explorer /select,"{path}"')
-
-report = Report('0000')
-report.create_user_specific_pdf('5', '5', '5', '5', '5 ', '5', '8008')
