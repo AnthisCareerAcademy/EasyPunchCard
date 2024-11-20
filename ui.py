@@ -607,7 +607,6 @@ class GUI:
             background="#00796B"
         )
         calendar.grid(row=0, column=0, sticky="nsew")
-        print(calendar.get_date())
 
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
@@ -722,70 +721,6 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def open_select_employee_window(self):
-        """
-        Opens a new window to select an employee before editing it
-        :return None:
-        """
-        if self.select_employee_frame is None:
-            self.select_employee_frame = tk.Toplevel(self.admin_frame)
-            self.select_employee_frame.title("Choose Employee")
-            self.select_employee_frame.geometry("600x400")
-
-            # Title label
-            employee_label = ttk.Label(self.select_employee_frame,
-                                       text="Choose an Employee",
-                                       font=("Roboto", 20, "bold"))
-            employee_label.pack()
-
-            # Gets all the employees
-            employees = self.current_user.access.admin_read_all_users()
-
-            # Maps the username to their PIN -----------------------------------
-            employees_credentials: dict[str, str] = {}
-
-            for employee in employees:
-                employees_credentials.update({employee[1]: employee[0]})
-            # ----------------------------------------------------------------------
-
-            # Sets up a dropdown of the employees
-            employee_combobox: ttk.Combobox = ttk.Combobox(
-                self.select_employee_frame,
-                values=[*list(employees_credentials.keys())],
-                font=("Roboto", 20),
-            )
-            employee_combobox.pack(pady=10)
-
-            def handle_selection():
-                """
-                Makes sure the id selected is valid
-                :return None:
-                """
-
-                try:
-                    emp_id = employees_credentials[employee_combobox.get()]
-                    self.employee_selected(emp_id)
-                except KeyError:
-                    tk.messagebox.showwarning("User Error",
-                                              "Please select a valid employee id")
-
-            # Set up the select button
-            select_button: tk.Button = tk.Button(
-                self.select_employee_frame,
-                text="Select",
-                command=handle_selection,  # Causes an error
-                bg="#00796B",
-                fg="white",
-                font=("Roboto", 36, "bold"),
-                cursor="hand2"
-            )
-
-            select_button.pack(pady=30)
-        else:
-            self.select_employee_frame.destroy()
-            self.select_employee_frame = None
-            self.open_select_employee_window()
-
     def add_employee_request(self, pin: str, username: str):
 
         # Creates a list to store the active PINs in the database
