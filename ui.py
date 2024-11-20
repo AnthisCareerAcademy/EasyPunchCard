@@ -406,7 +406,7 @@ class GUI:
         )
 
         # Textbox in which the student's PIN will be hosted
-        pin_entry.insert(0, "PIN")  # Prepopulate with "PIN"
+        pin_entry.insert(0, "PIN - (4 digits)")  # Prepopulate with "PIN"
         pin_entry.grid(row=1, column=0, sticky="nsew", pady=5)
         pin_entry.bind("<FocusIn>", lambda clicked: pin_entry.delete(0, tk.END))
 
@@ -443,7 +443,8 @@ class GUI:
             font=("Roboto", 30, "bold"),
             relief="flat",
             bd=0,
-            cursor="hand2"
+            cursor="hand2",
+            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get())
         )
 
         add_button.grid(row=1, column=1, sticky="ew")
@@ -784,6 +785,39 @@ class GUI:
             self.select_employee_frame.destroy()
             self.select_employee_frame = None
             self.open_select_employee_window()
+
+    def add_employee_request(self, pin: str, username: str):
+
+        # Creates a list to store the active PINs in the database
+        active_pins: list[str] = []
+        active_usernames: list[str] = []
+
+        # Goes through the list of users and extracts their PINs
+        for user in self.current_user.access.admin_read_all_users():
+            active_pins.append(user[0])
+            active_usernames.append(user[1])
+
+        # Checks for possible PIN errors from the user
+        if len(pin) != 4:
+            messagebox.showwarning("PIN Error", "Your PIN needs to be 4 digits")
+            return
+        elif not pin.isdigit():
+            messagebox.showwarning("PIN Error", "Your PIN cannot have letters only numbers are allowed")
+            return
+        elif pin in active_pins:
+            messagebox.showwarning("PIN Error", f"Another user exists with the same PIN: {pin}")
+            return
+
+        # Checks for possible username errors from the user
+        if not username:
+            messagebox.showwarning("USERNAME Error", "Your username cannot be empty")
+            return
+        elif username in active_usernames:
+            messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
+            return
+
+        self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+        self.current_user.access.add_user(pin, username, 0)
 
     def open_reports_window(self):
         """
