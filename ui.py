@@ -1,8 +1,12 @@
 import tkinter as tk
-from tkcalendar import Calendar
+
 from tkinter import ttk, messagebox
+
+from tkcalendar import Calendar
+from datetime import datetime
+
+
 from User import User
-from datetime import datetime, timedelta
 
 class GUI:
     def __init__(self):
@@ -22,6 +26,8 @@ class GUI:
         # Create a variable for the current User
         self.current_user: User | None = None
 
+        self.admin_status: tk.IntVar = tk.IntVar(value=0)
+
         # Create frames for different sections
         self.nav_frame: ttk.Frame = ttk.Frame(self.root)
 
@@ -31,19 +37,20 @@ class GUI:
         self.reports_frame: ttk.Frame = ttk.Frame(self.root)
         self.employee_management_frame: ttk.Frame = ttk.Frame(self.root)
 
+        # Admin Windows
+        self.select_employee_frame: None | ttk.Frame = None
+        self.edit_employee_frame: None | ttk.Frame = None
+        self.add_employee_frame: None | ttk.Frame = ttk.Frame(self.root)
+
         # A list of the current frames
         self.frames: list[str: ttk.Frame] = {
             "log_in_frame": self.log_in_frame,
             "clock_in_frame": self.clock_in_frame,
             "admin_frame": self.admin_frame,
             "reports_frame": self.reports_frame,
-            "employee_management_frame": self.employee_management_frame
+            "employee_management_frame": self.employee_management_frame,
+            "add_employee_frame": self.add_employee_frame,
         }
-
-        # Admin Windows
-        self.select_employee_window: None | tk.Toplevel = None
-        self.edit_employee_window: None | tk.Toplevel = None
-        self.add_employee_window: None | tk.Toplevel = None
 
         # Start The Program with the log in screen
         self.create_log_in_screen()
@@ -346,82 +353,344 @@ class GUI:
         log_out_button.pack(anchor="center", pady=10)
         # ----------------------------------------------------------
 
+    def create_add_employee_screen(self):
+        """
+        Creates and configures the elements needed
+        to add employees (students) to the database
+        """
+
+        # Configuring the rows of the parent window
+        self.add_employee_frame.rowconfigure(0, weight=6)  # Top space
+        self.add_employee_frame.rowconfigure(1, weight=6)  # Center Space
+        self.add_employee_frame.rowconfigure(2, weight=2)  # Footer space
+
+        # Configuring the columns of the parent window
+        self.add_employee_frame.columnconfigure(0, weight=1)  # Left space
+        self.add_employee_frame.columnconfigure(1, weight=2)  # Center space
+        self.add_employee_frame.columnconfigure(2, weight=1)  # Right space
+
+        # Frame that will be on the higher side of the screen
+        top_frame: ttk.Frame = ttk.Frame(
+            self.add_employee_frame,
+            # borderwidth=5,
+            # relief="solid"
+
+        )
+        top_frame.grid(row=0, column=1, sticky="nsew")
+        top_frame.grid_propagate(False)
+
+        # Configuring the columns of the top child window
+        top_frame.columnconfigure(0, weight=3)
+        top_frame.columnconfigure(1, weight=1)
+        top_frame.columnconfigure(2, weight=3)
+
+        # Configuring the rows of the top child window
+        top_frame.rowconfigure(0, weight=2)
+        top_frame.rowconfigure(1, weight=1)
+        top_frame.rowconfigure(2, weight=8)
+        top_frame.rowconfigure(6, weight=2)
+
+        # title label
+        title_label: ttk.Label = ttk.Label(
+            top_frame,
+            text="New Employee",
+            font=("Roboto", 50, "bold"),
+            foreground="#00796B"
+        )
+
+        title_label.grid(row=0, column=0, columnspan=3)
+
+        # TextBoxes
+        pin_entry = ttk.Entry(
+            top_frame,
+            font=("Roboto", 20),
+        )
+
+        # Textbox in which the student's PIN will be hosted
+        pin_entry.insert(0, "PIN - (4 digits)")  # Prepopulate with "PIN"
+        pin_entry.grid(row=1, column=0, sticky="nsew", pady=5)
+        pin_entry.bind("<FocusIn>", lambda clicked: pin_entry.delete(0, tk.END))
+
+        # Textbox in which the student's username will be hosted
+        username_entry = ttk.Entry(
+            top_frame,
+            font=("Roboto", 20)
+        )
+        username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
+        username_entry.grid(row=1, column=2, sticky="nsew", pady=5)
+        username_entry.bind("<FocusIn>", lambda clicked: username_entry.delete(0, tk.END))
+
+        # Creates the
+        buttons_frame: ttk.Frame = ttk.Frame(top_frame)
+        buttons_frame.grid(row=2, column=0, columnspan=3, sticky="nsew")
+        buttons_frame.grid_propagate(False)
+
+        # Configures the frame's columns
+        buttons_frame.columnconfigure(0, weight=1)
+        buttons_frame.columnconfigure(1, weight=5)
+        buttons_frame.columnconfigure(2, weight=1)
+
+        # Configures the frame's row
+        buttons_frame.rowconfigure(0, weight=2)
+        buttons_frame.rowconfigure(1, weight=4)
+        buttons_frame.rowconfigure(2, weight=4)
+        buttons_frame.rowconfigure(3, weight=1)
+
+        add_button: tk.Button = tk.Button(
+            buttons_frame,
+            text="Add",
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get())
+        )
+
+        add_button.grid(row=1, column=1, sticky="ew")
+
+        reset_button: tk.Button = tk.Button(
+            buttons_frame,
+            text="Reset",
+            bg="#8B0000",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            bd=0,
+            cursor="hand2",
+            command=lambda: self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+        )
+
+        reset_button.grid(row=2, column=1, sticky="ew")
+
+        # Frame that will host the back button
+        back_button_frame: ttk.Frame = ttk.Frame(
+            self.add_employee_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
+        back_button_frame.grid(row=2, column=0, sticky="nsew")
+        back_button_frame.grid_propagate(False)
+
+        # configures the rows of the back button frame
+        back_button_frame.rowconfigure(0, weight=1)
+        back_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the back button frame
+        back_button_frame.columnconfigure(0, weight=1)
+        back_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the admin back to the admin panel
+        back_button: tk.Button = tk.Button(
+            back_button_frame,
+            text="Back",
+            bg="#8B0000",
+            command=lambda: self.show(self.employee_management_frame, "employee_management_frame", self.create_employee_management_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        back_button.grid(row=1, column=0, sticky="nsew")
+
     def create_employee_management_screen(self):
         """
         Creates and configures the elements needed for the window
         :return None
         """
 
-        # Title -------------------------------
-        title_label: ttk.Label = ttk.Label(
+        # Configuring the rows of the parent window
+        self.employee_management_frame.rowconfigure(0, weight=6)  # Top space
+        self.employee_management_frame.rowconfigure(1, weight=6)  # Center Space
+        self.employee_management_frame.rowconfigure(2, weight=2)  # Footer space
+
+        # Configuring the columns of the parent window
+        self.employee_management_frame.columnconfigure(0, weight=1)  # Left space
+        self.employee_management_frame.columnconfigure(1, weight=2)  # Center space
+        self.employee_management_frame.columnconfigure(2, weight=1)  # Right space
+
+        # Frame that will be on the higher side of the screen
+        top_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+
+        )
+        top_frame.grid(row=0, column=1, sticky="nsew")
+        top_frame.grid_propagate(False)
+
+        # Configuring the columns of the top child window
+        top_frame.columnconfigure(0, weight=1)
+        top_frame.columnconfigure(1, weight=1)
+        top_frame.columnconfigure(2, weight=1)
+        top_frame.columnconfigure(3, weight=1)
+        top_frame.columnconfigure(4, weight=1)
+        top_frame.columnconfigure(5, weight=1)
+        top_frame.columnconfigure(6, weight=1)
+
+        # Configuring the rows of the top child window
+        top_frame.rowconfigure(0, weight=2)
+        top_frame.rowconfigure(1, weight=1)
+        top_frame.rowconfigure(2, weight=1)
+        top_frame.rowconfigure(3, weight=1)
+        top_frame.rowconfigure(4, weight=1)
+        top_frame.rowconfigure(5, weight=1)
+        top_frame.rowconfigure(6, weight=5)
+
+        # title label
+        title_label: ttk.Label = ttk.Label(
+            top_frame,
             text="Employee Management",
-            font=("Roboto", 60, "bold"),
+            font=("Roboto", 50, "bold"),
             foreground="#00796B"
         )
-        title_label.pack()
-        # -------------------------------------
 
-        # Management buttons -----------------------------------------------
-        edit_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Edit Employee",
-            command=lambda: self.open_select_employee_window(),
+        title_label.grid(row=0, column=0, columnspan=6)
+
+        employees = {}
+        for employee in self.current_user.access.admin_read_all_users():
+            # Skips the admin user
+            if employee[1] == "admin_user":
+                continue
+            employees.update({employee[1]: employee[0]})
+
+        # Dropdown of the available employees
+        select_employee_dropdown: ttk.Combobox = ttk.Combobox(
+            top_frame,
+            values=list(employees.keys()),
+            font=("Roboto", 25, "bold")
+        )
+
+        select_employee_dropdown.grid(
+            row=2, column=0,
+            sticky="new",
+            columnspan=6
+        )
+
+        # Button used to select an employee
+        select_button: tk.Button = tk.Button(
+            top_frame,
+            text="Select",
             bg="#00796B",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2",
-        )
-
-        edit_employee_button.pack(anchor="center", pady=50)
-
-        add_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Add Employee",
-            command=lambda: self.open_select_employee_window(),
-            bg="#00796B",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        add_employee_button.pack(anchor="center", pady=10)
-
-        remove_employee_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Remove Employee",
-            command=lambda: self.open_select_employee_window(),
-            # Needs to be edited
-            bg="#8B0000",
-            fg="white",
-            font=("Roboto", 36, "bold"),
-            relief="flat",
-            bd=0,
-            cursor="hand2"
-        )
-
-        remove_employee_button.pack(anchor="center", pady=50)
-
-    # --------------------------------------------------------------------------
-
-        # Log out button -----------------------------------------
-        back_button: tk.Button = tk.Button(
-            self.employee_management_frame,
-            text="Back",
-            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
-            bg="#8B0000",
             fg="white",
             font=("Roboto", 30, "bold"),
             relief="flat",
             bd=0,
-            cursor="hand2", )
+            cursor="hand2"
+        )
+        select_button.grid(row=3, column=1, columnspan=4, sticky="ew")
 
-        back_button.pack(side="bottom", anchor="sw")
-        # ----------------------------------------------------------
+        # Button used to delete an employee from the database
+        delete_employee_button: tk.Button = tk.Button(
+            top_frame,
+            text="Delete Employee",
+            bg="#8B0000",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            command=lambda: self.delete_employee_request(select_employee_dropdown.get(), employees),
+            bd=0,
+            cursor="hand2"
+        )
+        delete_employee_button.grid(row=4, column=1, columnspan=4, sticky="ew")
+
+        # Frame that will be on the lower side of the screen
+        bottom_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
+
+        bottom_frame.grid(row=1, column=1, sticky="nsew")
+        bottom_frame.grid_propagate(False)
+
+        # Configures the rows of the bottom child frame
+        bottom_frame.rowconfigure(0, weight=3)
+        bottom_frame.rowconfigure(1, weight=1)
+        bottom_frame.rowconfigure(2, weight=2)
+
+        # Configures the columns of the bottom child frame
+        bottom_frame.columnconfigure(0, weight=2)
+        bottom_frame.columnconfigure(1, weight=2)
+        bottom_frame.columnconfigure(2, weight=2)
+
+        # Creates the calendar that will be used to edit the student's hours
+        calendar = Calendar(
+            bottom_frame,
+            selectmode='day',
+            year=datetime.today().year,
+            month=datetime.today().month,
+            day=datetime.today().day,
+            font=("Roboto", 12),
+            foreground = "white",
+            background="#00796B"
+        )
+        calendar.grid(row=0, column=0, sticky="nsew")
+
+        # Frame that will host the back button
+        back_button_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
+        back_button_frame.grid(row=2, column=0, sticky="nsew")
+        back_button_frame.grid_propagate(False)
+
+        # configures the rows of the back button frame
+        back_button_frame.rowconfigure(0, weight=1)
+        back_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the back button frame
+        back_button_frame.columnconfigure(0, weight=1)
+        back_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the admin back to the admin panel
+        back_button: tk.Button = tk.Button(
+            back_button_frame,
+            text="Back",
+            bg="#8B0000",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        back_button.grid(row=1, column=0, sticky="nsew")
+
+        # Frame that will host the Add Employee button
+        add_employee_button_frame: ttk.Frame = ttk.Frame(
+            self.employee_management_frame,
+            # borderwidth=5,
+            # relief="solid"
+        )
+        add_employee_button_frame.grid(row=2, column=2, sticky="nsew")
+        add_employee_button_frame.grid_propagate(False)
+
+        # configures the rows of the add_employee_button_frame
+        add_employee_button_frame.rowconfigure(0, weight=1)
+        add_employee_button_frame.rowconfigure(1, weight=1)
+
+        # configures the columns of the add_employee_button_frame
+        add_employee_button_frame.columnconfigure(0, weight=1)
+        add_employee_button_frame.columnconfigure(1, weight=1)
+
+        # Button that takes the add employee window
+        add_employee_button: tk.Button = tk.Button(
+            add_employee_button_frame,
+            text="Add Employee",
+            bg="#06402B",
+            # command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            fg="white",
+            font=("Roboto", 24, "bold"),
+            relief="flat",
+            cursor="hand2",
+            command=lambda: self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+        )
+
+        add_employee_button.grid(row=1, column=1, sticky="nsew")
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
@@ -473,85 +742,49 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def open_edit_employee_window(self):
-        """
-        Opens a new window to edit employee details
-        :return None:
-        """
+    def add_employee_request(self, pin: str, username: str):
 
-    def open_add_employee_window(self):
-        """Creates the elements and the pop-up window needed
-        to add a new employee to the database"""
+        # Creates a list to store the active PINs in the database
+        active_pins: list[str] = []
+        active_usernames: list[str] = []
 
-        if self.add_employee_window is None:
-            # Configures the initial pop-up window
-            self.add_employee_window = tk.Toplevel(self.employee_management_frame)
-            self.add_employee_window.title("Add Employee")
-            self.add_employee_window.geometry("600x400")
+        # Goes through the list of users and extracts their PINs
+        for user in self.current_user.access.admin_read_all_users():
+            active_pins.append(user[0])
+            active_usernames.append(user[1])
 
-    def open_select_employee_window(self):
-        """
-        Opens a new window to select an employee before editing it
-        :return None:
-        """
-        if self.select_employee_window is None:
-            self.select_employee_window = tk.Toplevel(self.admin_frame)
-            self.select_employee_window.title("Choose Employee")
-            self.select_employee_window.geometry("600x400")
+        # Checks for possible PIN errors from the user
+        if len(pin) != 4:
+            messagebox.showwarning("PIN Error", "Your PIN needs to be 4 digits")
+            return
+        elif not pin.isdigit():
+            messagebox.showwarning("PIN Error", "Your PIN cannot have letters only numbers are allowed")
+            return
+        elif pin in active_pins:
+            messagebox.showwarning("PIN Error", f"Another user exists with the same PIN: {pin}")
+            return
 
-            # Title label
-            employee_label = ttk.Label(self.select_employee_window,
-                                       text="Choose an Employee",
-                                       font=("Roboto", 20, "bold"))
-            employee_label.pack()
+        # Checks for possible username errors from the user
+        if not username:
+            messagebox.showwarning("USERNAME Error", "Your username cannot be empty")
+            return
+        elif username in active_usernames:
+            messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
+            return
 
-            # Gets all the employees
-            employees = self.current_user.access.admin_read_all_users()
+        self.current_user.access.add_user(pin, username, 0)
+        messagebox.showinfo("User Addition", f"{username} Has been added to the database")
+        self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
 
-            # Maps the username to their PIN -----------------------------------
-            employees_credentials: dict[str, str] = {}
+    def delete_employee_request(self, username: str, employees: dict[str, str]):
 
-            for employee in employees:
-                employees_credentials.update({employee[1]: employee[0]})
-            # ----------------------------------------------------------------------
-
-            # Sets up a dropdown of the employees
-            employee_combobox: ttk.Combobox = ttk.Combobox(
-                self.select_employee_window,
-                values=[*list(employees_credentials.keys())],
-                font=("Roboto", 20),
-            )
-            employee_combobox.pack(pady=10)
-
-            def handle_selection():
-                """
-                Makes sure the id selected is valid
-                :return None:
-                """
-
-                try:
-                    emp_id = employees_credentials[employee_combobox.get()]
-                    self.employee_selected(emp_id)
-                except KeyError:
-                    tk.messagebox.showwarning("User Error",
-                                              "Please select a valid employee id")
-
-            # Set up the select button
-            select_button: tk.Button = tk.Button(
-                self.select_employee_window,
-                text="Select",
-                command=handle_selection,  # Causes an error
-                bg="#00796B",
-                fg="white",
-                font=("Roboto", 36, "bold"),
-                cursor="hand2"
-            )
-
-            select_button.pack(pady=30)
-        else:
-            self.select_employee_window.destroy()
-            self.select_employee_window = None
-            self.open_select_employee_window()
+       try:
+           employee_pin = employees[username]
+           self.current_user.access.remove_user(employee_pin)
+           messagebox.showinfo("User Deletion", f"{username} has been deleted from the database")
+           self.show(self.employee_management_frame, "employee_management_frame", self.create_employee_management_screen)
+       except KeyError:
+           messagebox.showwarning("User Error", "Please select a valid user")
 
     def open_reports_window(self):
         """
@@ -732,7 +965,6 @@ class GUI:
         """
 
         employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        self.open_edit_employee_window()
         print(employee)
     # ----------------------------------------------------
 
@@ -767,7 +999,7 @@ class GUI:
                         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
 
                 # Warns the user if the credentials are incorrect
-                except TypeError:
+                except ValueError:
                     messagebox.showwarning("User Error", "User does not exist")
                     self.pin.set("")
         else:
