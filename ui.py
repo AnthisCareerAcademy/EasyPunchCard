@@ -548,10 +548,17 @@ class GUI:
 
         title_label.grid(row=0, column=0, columnspan=6)
 
+        employees = {}
+        for employee in self.current_user.access.admin_read_all_users():
+            # Skips the admin user
+            if employee[1] == "admin_user":
+                continue
+            employees.update({employee[1]: employee[0]})
+
         # Dropdown of the available employees
         select_employee_dropdown: ttk.Combobox = ttk.Combobox(
             top_frame,
-            values=["Luis Velasquez", "Jackson", "Aung"],
+            values=list(employees.keys()),
             font=("Roboto", 25, "bold")
         )
 
@@ -572,8 +579,21 @@ class GUI:
             bd=0,
             cursor="hand2"
         )
-
         select_button.grid(row=3, column=1, columnspan=4, sticky="ew")
+
+        # Button used to delete an employee from the database
+        delete_employee_button: tk.Button = tk.Button(
+            top_frame,
+            text="Delete Employee",
+            bg="#8B0000",
+            fg="white",
+            font=("Roboto", 30, "bold"),
+            relief="flat",
+            command=lambda: self.delete_employee_request(select_employee_dropdown.get(), employees),
+            bd=0,
+            cursor="hand2"
+        )
+        delete_employee_button.grid(row=4, column=1, columnspan=4, sticky="ew")
 
         # Frame that will be on the lower side of the screen
         bottom_frame: ttk.Frame = ttk.Frame(
@@ -607,7 +627,6 @@ class GUI:
             background="#00796B"
         )
         calendar.grid(row=0, column=0, sticky="nsew")
-        print(calendar.get_date())
 
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
@@ -752,8 +771,19 @@ class GUI:
             messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
             return
 
-        self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
         self.current_user.access.add_user(pin, username, 0)
+        messagebox.showinfo("User Addition", f"{username} Has been added to the database")
+        self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+
+    def delete_employee_request(self, username: str, employees: dict[str, str]):
+
+       try:
+           employee_pin = employees[username]
+           self.current_user.access.remove_user(employee_pin)
+           messagebox.showinfo("User Deletion", f"{username} has been deleted from the database")
+           self.show(self.employee_management_frame, "employee_management_frame", self.create_employee_management_screen)
+       except KeyError:
+           messagebox.showwarning("User Error", "Please select a valid user")
 
     def open_reports_window(self):
         """
