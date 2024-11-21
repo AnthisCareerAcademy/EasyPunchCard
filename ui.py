@@ -909,7 +909,7 @@ class GUI:
         print_specific_user_button: tk.Button = tk.Button(
             report_window,
             text="Print Specific User Report",
-            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), self.start_date.strftime('%m-%d-%Y'), self.end_date.strftime('%m-%d-%Y'), employee_combobox.get(), str(values[employee_combobox.get()])),
+            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), self.start_date.strftime('%m/%d/%Y'), self.end_date.strftime('%m/%d/%Y'), employee_combobox.get(), str(values[employee_combobox.get()])),
             bg="#00796B",
             fg="white", font=("Roboto", 12, "bold"),
             relief="flat", bd=0)
