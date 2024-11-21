@@ -34,7 +34,7 @@ class GUI:
         self.clock_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.admin_frame: ttk.Frame = ttk.Frame(self.root)
         self.reports_frame: ttk.Frame = ttk.Frame(self.root)
-        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root, borderwidth=5, relief="solid")
+        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root)
 
         # Admin Windows
         self.select_employee_frame: None | ttk.Frame = None
@@ -513,8 +513,8 @@ class GUI:
         # Frame that will be on the higher side of the screen
         top_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
 
         )
         top_frame.grid(row=0, column=1, sticky="nsew")
@@ -598,8 +598,8 @@ class GUI:
         # Frame that will be on the lower side of the screen
         bottom_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
         )
 
         bottom_frame.grid(row=1, column=1, sticky="nsew")
@@ -631,8 +631,8 @@ class GUI:
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
         )
         back_button_frame.grid(row=2, column=0, sticky="nsew")
         back_button_frame.grid_propagate(False)
@@ -662,8 +662,8 @@ class GUI:
         # Frame that will host the Add Employee button
         add_employee_button_frame: ttk.Frame = ttk.Frame(
             self.employee_management_frame,
-            borderwidth=5,
-            relief="solid"
+            # borderwidth=5,
+            # relief="solid"
         )
         add_employee_button_frame.grid(row=2, column=2, sticky="nsew")
         add_employee_button_frame.grid_propagate(False)
