@@ -167,3 +167,9 @@ cython_debug/
 # excel
 .xls
 .xlsx
+
+# images
+*.pdf
+
+# Reports
+/Reports
