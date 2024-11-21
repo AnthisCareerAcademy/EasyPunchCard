@@ -73,7 +73,9 @@ class Report():
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
             c.drawString(80, y_pos, row[1])
-            c.drawString(370, y_pos, str(row[-1]))
+            hours = row[-1] // 60
+            minutes = row[-1] % 60
+            c.drawCentredString(360, y_pos, f"{hours}:{minutes}")
             y_pos -= 16
 
         # Save the PDF
@@ -87,6 +89,7 @@ class Report():
         page_num = 1
         y_pos = 605
         data = self.access.admin_read_self_table(student_id)
+        clock_format = "%Y-%m-%d %H:%M:%S.%f"
 
         # Set up the canvas
         c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)
@@ -124,6 +127,10 @@ class Report():
         c.drawString(520, 30, f"Page {page_num} of {total_pages}")
         c.drawString(30, 30, current_time)
 
+        # Convert start and end dates to datetime
+        date_format = '%m/%d/%Y'
+        start_date = datetime.strptime(start_date, date_format)
+        end_date = datetime.strptime(end_date, date_format)
         # Loop through all names and total minutes
         for row in data:
             if y_pos < 70:
@@ -139,14 +146,25 @@ class Report():
                 y_pos = 730
             # Date, clock in time, clock out time, and total minutes
             c.setFont("Helvetica", 12)
-            c.drawString(75, y_pos, row[1])
-            c.drawRightString(245, y_pos, row[2])
-            if row[3] == None:
-                c.drawRightString(375, y_pos, "N/A")
+            # This is the date on the second column of the data frame
+            row_date = datetime.strptime(row[1], date_format)
+            if start_date <= row_date <= end_date:
+                c.drawString(75, y_pos, row[1])
+                # Get the time in string and convert it to datetime
+                time_in = datetime.strptime(row[2], clock_format)
+                c.drawRightString(245, y_pos, f"{time_in.hour}:{time_in.minute}")
+                if row[3] == None:
+                    c.drawRightString(375, y_pos, "N/A")
+                else:
+                    # Get the time out string and convert it to datetime
+                    time_out = datetime.strptime(row[3], clock_format)
+                    c.drawRightString(375, y_pos, f"{time_out.hour}:{time_in.minute}")
+                hours = row[4] // 60
+                minutes = row[4] % 60
+                c.drawCentredString(468, y_pos, f"{hours}:{minutes}")
+                y_pos -= 16
             else:
-                c.drawRightString(375, y_pos, row[3])
-            c.drawString(460, y_pos, str(row[4]))
-            y_pos -= 16
+                continue
 
         # Save the PDF
         c.save()
