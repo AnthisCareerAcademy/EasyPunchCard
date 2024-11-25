@@ -1022,6 +1022,3 @@ class GUI:
     def exit_fullscreen(self):
         self.root.attributes("-fullscreen", False)
 
-
-gui = GUI()
-gui.root.mainloop()
