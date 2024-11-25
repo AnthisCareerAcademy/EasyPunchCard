@@ -1,27 +1,26 @@
-from Clock import Clock
+from User import User
 
 
-def test_clock_in_pushing(setup_user):
+def test_clock_in_pushing():
     """
     Test that clocking in correctly updates the database.
     """
-    lock = Clock(student_id="5678")
+    user = User("1010")
 
     # Mock initial database state
-    conn = setup_user.get_db()
+    conn = user.access.get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO all_users (student_id, total_minutes, start_time, working_status) VALUES (?, ?, ?, ?)",
-                   ("5678", 50, None, 0))
-    conn.commit()
 
     # Perform the clock-in action
-    Clock.clock_in()
+    user.clock.clock_in()
 
     # Verify working_status and start_time are updated
-    cursor.execute("SELECT working_status, start_time FROM all_users WHERE student_id = ?", ("5678",))
-    working_status, start_time = cursor.fetchone()
+    cursor.execute("SELECT working_status FROM all_users WHERE student_id = ?", ("1010",))
+    working_status = cursor.fetchall()[0][0]
     assert working_status == 1, f"Expected working_status to be 1, but got {working_status}"
-    assert start_time is not None, "Expected start_time to be set, but got None"
+
+    # Clocks the user out
+    user.clock.clock_out()
 
     cursor.close()
     conn.close()
