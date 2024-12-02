@@ -110,9 +110,9 @@ class SqlAccess:
             # user is not an admin
             if admin_status == 0:
                 cursor.execute('''
-                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
-                VALUES (?, ?, ?, NULL, 0, 0, ?)
-                ''', (student_id, username, admin_status, graduation_year))
+                INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
+                VALUES (?, ?, ?, NULL, 0, 0)
+                ''', (student_id, username, admin_status))
 
                 cursor.execute(f'''
                                 CREATE TABLE IF NOT EXISTS user_{student_id} (
@@ -132,8 +132,8 @@ class SqlAccess:
             elif admin_status == 1:
                 cursor.execute('''
                 INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
-                VALUES (?, ?, ?, NULL, 0, 0, 0000)
-                ''', (student_id, username, admin_status))
+                VALUES (?, ?, ?, NULL, 0, 0, ?)
+                ''', (student_id, username, admin_status, graduation_year))
                 conn.commit()
                 cursor.close()
 
