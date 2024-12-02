@@ -792,6 +792,7 @@ class GUI:
             messagebox.showwarning("Graduation Year Error", "Your Graduation year cannot be empty")
         elif grad_year_int < datetime.today().year:
             messagebox.showwarning("Graduation Year Error", f"Your Graduation year cannot be less than {datetime.today().year}")
+            return
 
         self.current_user.access.add_user(pin, username, 0, grad_year_int)
         messagebox.showinfo("User Addition", f"{username} Has been added to the database")
