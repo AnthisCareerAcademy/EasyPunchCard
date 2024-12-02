@@ -288,8 +288,8 @@ class GUI:
         # ----------------------------------------------
 
         # Set the columns and initializing the employees table ---------------------------------------------
-        columns: tuple[str, str, str, str, str, str] = (
-            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes")
+        columns: tuple[str, str, str, str, str, str, str] = (
+            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
         employees_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
