@@ -68,35 +68,6 @@ class SqlAccess:
             
             conn.commit()
 
-    def add_self(self, username:str):
-        """
-        allows any user to add themselves to the database
-        """
-        conn = self.get_db()
-        cursor = conn.cursor()
-        if self.user_exists():
-            raise ValueError("ERROR: user already exists")
-        # Add user into main table
-        cursor.execute('''
-                       INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes)
-                       VALUES (?, ?, ?, NULL, 0, 0)
-                       ''', (self.student_id, username, self.admin_status))
-        # create table for user
-        cursor.execute(f'''
-                        CREATE TABLE IF NOT EXISTS user_{self.student_id} (
-                        student_id TEXT,
-                        date TEXT,
-                        start_time TEXT,
-                        end_time TEXT,
-                        total_minutes INT,
-                        CONSTRAINT FK_student_id FOREIGN KEY (student_id)
-                        REFERENCES all_users(student_id)
-                        )
-                        ''')
-        conn.commit()
-        cursor.close()
-        conn.close()
-
     def add_user(self, student_id:str, username:str, admin_status:int, graduation_year: int):
         """
         allows admin users to add users to the database
