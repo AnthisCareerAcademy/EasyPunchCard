@@ -29,4 +29,36 @@ jobs:
     - name: Build On Windows
       run: |
         echo "Building on Windows"
-        # Luis pyinstaller cli code
+        
+        # Set-up chocolatey
+        Set-ExecutionPolicy AllSigned
+        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+        # Install Inno Setup Command Line Compiler
+        choco install innosetup
+
+        # Build .exe
+        pyinstaller build_instructions/EasyPunchCard.spec
+
+        # Build Installer
+        iscc build_instructions/easypunchcard_setup_script.iss
+
+        # delete all artifacts except 
+        find dist -type f ! -name 'EasyPunchCard_setup.exe' -delete
+    
+    name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ runner.os }}-${{ github.run_id }}
+        path: dist/
+
+    - name: Upload Windows Release Asset
+      if: runner.os == 'Windows'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: dist/EasyPunchCard_setup.exe  # Replace with actual artifact name
+        asset_name: EasyPunchCard.exe  # Replace with actual artifact name
+        asset_content_type: application/octet-stream
