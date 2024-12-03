@@ -288,8 +288,8 @@ class GUI:
         # ----------------------------------------------
 
         # Set the columns and initializing the employees table ---------------------------------------------
-        columns: tuple[str, str, str, str, str, str] = (
-            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes")
+        columns: tuple[str, str, str, str, str, str, str] = (
+            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
         employees_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
@@ -381,7 +381,7 @@ class GUI:
 
         # Configuring the columns of the top child window
         top_frame.columnconfigure(0, weight=3)
-        top_frame.columnconfigure(1, weight=1)
+        top_frame.columnconfigure(1, weight=3)
         top_frame.columnconfigure(2, weight=3)
 
         # Configuring the rows of the top child window
@@ -408,8 +408,18 @@ class GUI:
 
         # Textbox in which the student's PIN will be hosted
         pin_entry.insert(0, "PIN - (4 digits)")  # Prepopulate with "PIN"
-        pin_entry.grid(row=1, column=0, sticky="nsew", pady=5)
+        pin_entry.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
         pin_entry.bind("<FocusIn>", lambda clicked: pin_entry.delete(0, tk.END))
+
+        # Textbox in which the student's graduation year will be hosted
+        grad_entry = ttk.Entry(
+            top_frame,
+            font=("Roboto", 20),
+        )
+
+        grad_entry.insert(0, "Grad Year - YYYY")  # Prepopulate with "PIN"
+        grad_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
+        grad_entry.bind("<FocusIn>", lambda clicked: grad_entry.delete(0, tk.END))
 
         # Textbox in which the student's username will be hosted
         username_entry = ttk.Entry(
@@ -417,7 +427,7 @@ class GUI:
             font=("Roboto", 20)
         )
         username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
-        username_entry.grid(row=1, column=2, sticky="nsew", pady=5)
+        username_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
         username_entry.bind("<FocusIn>", lambda clicked: username_entry.delete(0, tk.END))
 
         # Creates the
@@ -445,7 +455,7 @@ class GUI:
             relief="flat",
             bd=0,
             cursor="hand2",
-            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get())
+            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get(), grad_entry.get())
         )
 
         add_button.grid(row=1, column=1, sticky="ew")
@@ -742,7 +752,7 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def add_employee_request(self, pin: str, username: str):
+    def add_employee_request(self, pin: str, username: str, grad_year: str):
 
         # Creates a list to store the active PINs in the database
         active_pins: list[str] = []
@@ -772,7 +782,19 @@ class GUI:
             messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
             return
 
-        self.current_user.access.add_user(pin, username, 0)
+        try:
+            grad_year_int = int(grad_year)
+        except ValueError:
+            messagebox.showwarning("Graduation Year Error", "Your Graduation year needs to be a number")
+            return
+
+        if not grad_year_int:
+            messagebox.showwarning("Graduation Year Error", "Your Graduation year cannot be empty")
+        elif grad_year_int < datetime.today().year:
+            messagebox.showwarning("Graduation Year Error", f"Your Graduation year cannot be less than {datetime.today().year}")
+            return
+
+        self.current_user.access.add_user(pin, username, 0, grad_year_int)
         messagebox.showinfo("User Addition", f"{username} Has been added to the database")
         self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
 
@@ -1018,9 +1040,9 @@ class GUI:
         self.pin.set("")
         self.show(self.log_in_frame, "log_in_frame", self.create_log_in_screen)
 
-    # Extra functions
-    def exit_fullscreen(self):
-        self.root.attributes("-fullscreen", False)
+    # # Extra functions
+    # def exit_fullscreen(self):
+    #     self.root.attributes("-fullscreen", False)
 
 
 gui = GUI()
