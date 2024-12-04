@@ -64,7 +64,7 @@ class SqlAccess:
                 cursor.execute('''
                     INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', ('0000', 'admin_user', 1, None, 0, 0, datetime.today().year))
+                ''', ('0000', 'admin_user', 1, None, 0, 0, None))
             
             conn.commit()
 
