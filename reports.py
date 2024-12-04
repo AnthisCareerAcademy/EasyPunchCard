@@ -73,8 +73,8 @@ class Report():
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
             c.drawString(80, y_pos, row[1])
-            hours = row[-1] // 60
-            minutes = row[-1] % 60
+            hours = row[5] // 60
+            minutes = row[5] % 60
             c.drawCentredString(360, y_pos, f"{hours}:{minutes}")
             y_pos -= 16
 
