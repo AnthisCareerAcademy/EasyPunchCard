@@ -28,13 +28,13 @@ ArchitecturesAllowed=x64compatible
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\admin\Desktop\repos\EasyPunchCard\LICENSE
+LicenseFile=..\LICENSE
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\Users\admin\Desktop
-OutputBaseFilename=EasyPunchCard_WINDOWS_1.0_setup
-SetupIconFile=C:\Users\admin\Desktop\repos\EasyPunchCard\assets\windows_setup_image.ico
+OutputDir=..\dist
+OutputBaseFilename=EasyPunchCard_setup
+SetupIconFile=..\assets\windows_setup_image.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -46,7 +46,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\admin\Desktop\repos\EasyPunchCard\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
