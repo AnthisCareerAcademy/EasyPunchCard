@@ -1,12 +1,17 @@
 import sqlite3
 from pandas import read_sql_query
-from datetime import datetime
 
 class SqlAccess:
     """
     Allows the User Class to connect to the EasyPunchCard database. 
     """
     def __init__(self, student_id:str):
+        """
+        Initializes SqlAccess for the user
+
+        Args:
+            student_id (str): The student id of the user
+        """
         self.create_table()
         self.student_id = student_id
         self.exists = self.user_exists()
@@ -23,13 +28,22 @@ class SqlAccess:
 
     @staticmethod
     def get_db():
+        """
+        Creates a connection to the database.
+
+        Returns:
+            sqlite3.Connection: A connection object for the SQLite database.
+        """
         conn = sqlite3.connect('EasyPunchCard.db')
         return conn
     
 
     def user_exists(self):
         """
-        check if the student_id is in the all_users table
+        Checks if the user exists in the database using their student id.
+
+        Returns:
+            int: 1 if the user exists, 0 otherwise.
         """
         conn = self.get_db()
         cursor = conn.cursor()
@@ -41,6 +55,10 @@ class SqlAccess:
 
 
     def create_table(self):
+        """
+        Sets up the database table with an admin user if they do not already exist:
+        - `all_users`: Stores student ids, username, admin status, start time, working status, total minutes, and graduation year.
+        """
         with self.get_db() as conn:
             cursor = conn.cursor()
             cursor.execute('''
@@ -70,7 +88,16 @@ class SqlAccess:
 
     def add_user(self, student_id:str, username:str, admin_status:int, graduation_year: int):
         """
-        allows admin users to add users to the database
+        Allows admin users to add users to the database
+
+        Args:
+            student_id (str): The student id of the user being added (can't used already)
+            username (str): The username of the user being added to the database
+            admin_status (int): The admin status of the user being added (only 1 or 0)
+            graduation_year (int): The graduation year of the user being added
+
+        Raises:
+            ValueError: If the user trying to add another user doesn't have admin status
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -111,7 +138,14 @@ class SqlAccess:
                   
     def remove_user(self, student_id:str):
         """
-        allows admin users to remove users from the database
+        Allows admin users to remove users from the database
+
+        Args:
+            student_id (str): the student id of the user the admin want to remove
+
+        Raises:
+            ValueError: If user doesn't have admin status
+            TypeError: If the admin user is attempting to remove itself
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -135,29 +169,19 @@ class SqlAccess:
 
     def update_time(self, additional_minutes:int):
         """
-        conn = self.get_db()
-        get cursor
-        total_minutes = total_minutes from all_students of student_id
-        total_minutes += additional_minutes
-
-        ***from Clock class (after clocking in and clocking out) get date, start_time, and end_time
-        ***issue here
-
-        query to insert a row into user table
-        'INSERT INTO user_{student_id}INSERT INTO user_{student_id}(student_id, date, start_time, end_time, total_minutes)
-        VALUES({student_id}, {date}, {start_time}, {end_time}, {total_minutes})'
-        update total_minutes in all_users
-        'UPDATE all_users SET total_minutes = {total_minutes} WHERE student_id = {student_id}'
-
-        commit the queries
-        close the cursor
-        close the connection
+        Allows admins to add additional time to a specific user's total minutes
         """
 
 
     def admin_read_all_users(self):
         """
-        allows admin to retrieve all the data form the all_users table
+        allows admins to retrieve all the data form the all_users table
+
+        Returns:
+            list: A list (called data) of all the users in the "all_users" table
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -172,7 +196,17 @@ class SqlAccess:
 
     def admin_read_self_table(self, student_id:str):
         """
-        allow admin users to retreive all the data from a specified user_(ID) table
+        Allow admin users to retrieve all the data from a specified user_(ID) table
+
+        Args:
+            student_id (str): The student id of the user whose data is being retrieved 
+
+        Returns:
+            list: A list (called data) of everything in the specified user's table
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
+            sqlite3.OperationalError: If the query failed
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -192,7 +226,10 @@ class SqlAccess:
 
     def read_self_table(self):
         """
-        allows the user to retreive all the data from their own user_(ID) table
+        Allows the user to retrieve all the data from their own user_(ID) table
+
+        Raises:
+            sqlite3.OperationalError: If the query failed
         """
         conn = self.get_db()
         cursor = conn.cursor()
@@ -210,7 +247,13 @@ class SqlAccess:
 
     def get_data_all_users(self, column_name:str):
         """
-        allow user to read a single cell from their own row on all_users
+        allow user to read a single cell from their row on all_users
+
+        Args:
+            column_name (str): The column name from the "all_users" table that the data is being retrieved from
+
+        Returns:
+            return_type_varies: Returns the data that is retrieved from the specific column on their row on the "all_users" table
         """
         with self.get_db() as conn:
             cursor = conn.cursor()
@@ -224,6 +267,16 @@ class SqlAccess:
     def admin_get_data_all_users(self, student_id:str, column_name:str):
         """
         Allows admins to read a single cell from all_users of a specified ID and column name
+
+        Args:
+            column_name (str): The column name from the "all_users" table that the data is being retrieved from
+            student_id (str): The student id is the row on the "all_users" table where data is being retrieved from
+
+        Returns:
+            return_type_varies: Returns the data that is retrieved from the specified column on row on the "all_users" table
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -240,6 +293,17 @@ class SqlAccess:
     def admin_get_row_all_users(self, student_id:str):
         """
         allows admin to retrieve a specified user's row from all_users table
+
+        Args:
+            student_id (str): the student id of the user whose row is being retrieved from "all_users"
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
+            RuntimeError: If there's an error while retrieving data
+        
+        Returns:
+            tuple: if a row is returned from the database a tuple containing the user's row will be returned
+            None: if no row matches the query
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
@@ -261,7 +325,13 @@ class SqlAccess:
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
-        arguments are SQLite table name and the name you want the file to be (default is 'EasyPunchCard')
+
+        Args:
+            sql_table_name (str): SQLite table name
+            file_name (str) default = "EasyPunchCard": the name of the file (default is 'EasyPunchCard')
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
