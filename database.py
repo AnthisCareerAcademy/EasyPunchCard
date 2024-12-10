@@ -184,7 +184,7 @@ class SqlAccess:
             ValueError: If the user retrieving the data doesn't have admin status
         """
         if self.admin_status == 0:
-            raise ValueError("Error: c")
+            raise ValueError("Error: user doesn't have admin status")
         conn = self.get_db()
         cursor = conn.cursor()
         cursor.execute("""SELECT * FROM all_users""")
