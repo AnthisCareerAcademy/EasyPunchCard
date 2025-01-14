@@ -300,8 +300,10 @@ class GUI:
 
         # Insert Employees below -----------------------------------------------------------------------
         all_employees = self.current_user.access.admin_read_all_users()
+        print(all_employees)
         for employee in all_employees:
-            employees_table.insert("", "end", values=employee)
+            del employee["end_time"]
+            employees_table.insert("", "end", values=list(employee.values()))
         # ----------------------------------------------------------------------------------------------
 
         # Configure and pack the edit button ------------
