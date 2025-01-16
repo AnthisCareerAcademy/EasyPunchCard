@@ -22,7 +22,6 @@ class SqlAccess:
         Args:
             student_id (str): The student id of the user
         """
-        # self.create_table() Don't need to create a table anymore
         self.student_id = student_id
         self.exists = self.user_exists()
         if self.exists['user_exists']:
@@ -55,40 +54,6 @@ class SqlAccess:
         response = requests.get( self.link + self.userexistsEndpoint + f"?student_id={self.student_id}", headers = {"x-api-key": self.xapikey} )
         jsonValue = json.loads(response.text)
         return jsonValue
-
-
-    # REMOVE
-    def create_table(self):
-        """
-        Sets up the database table with an admin user if they do not already exist:
-        - `all_users`: Stores student ids, username, admin status, start time, working status, total minutes, and graduation year.
-        """
-        with self.get_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS all_users(
-                    student_id TEXT PRIMARY KEY,
-                    username TEXT NOT NULL,
-                    admin_status INT NOT NULL,
-                    start_time TEXT,
-                    working_status INT,
-                    total_minutes INT,
-                    graduation_year INT
-                )
-            ''')
-            
-            # Check if the admin user already exists
-            cursor.execute("SELECT EXISTS(SELECT 1 FROM all_users WHERE student_id = '0000')")
-            exists = cursor.fetchone()[0]
-            
-            # Insert the admin user only if they do not exist
-            if not exists:
-                cursor.execute('''
-                    INSERT INTO all_users (student_id, username, admin_status, start_time, working_status, total_minutes, graduation_year)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', ('0000', 'admin_user', 1, None, 0, 0, None))
-            
-            conn.commit()
 
     def add_user(self, student_id:str, username:str, admin_status:int, graduation_year: int):
         """
@@ -170,9 +135,9 @@ class SqlAccess:
         return data
     
 
-    def admin_read_self_table(self, student_id:str):
+    def admin_read_user_history(self, student_id:str):
         """
-        Allow admin users to retrieve all the data from a specified user_(ID) table
+        Allow admin users to retrieve all the data from a specified user table
 
         Args:
             student_id (str): The student id of the user whose data is being retrieved 
@@ -186,22 +151,9 @@ class SqlAccess:
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
-        response = requests.get(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey})
+        response = requests.get(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey})
         data = json.loads(response.text)
-        return data
-        
-    # NOT USED
-    def read_self_table(self):
-        """
-        Allows the user to retrieve all the data from their own user_(ID) table
-
-        Raises:
-            sqlite3.OperationalError: If the query failed
-        """
-        response = requests.get(self.link + self.userEndpoint + f"?student_id={self.student_id}", headers={"x-api-key": self.xapikey})
-        data = json.loads(response.text)
-        return data
-        
+        return data    
         
 
     def get_data_all_users(self, column_name:str):
@@ -262,7 +214,7 @@ class SqlAccess:
         data = json.loads(response.text)
         return data
 
-    # not our issue
+    # change to work with the api
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
