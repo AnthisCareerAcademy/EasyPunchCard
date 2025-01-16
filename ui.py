@@ -301,7 +301,8 @@ class GUI:
         # Insert Employees below -----------------------------------------------------------------------
         all_employees = self.current_user.access.admin_read_all_users()
         for employee in all_employees:
-            employees_table.insert("", "end", values=employee)
+            del employee["end_time"]
+            employees_table.insert("", "end", values=list(employee.values()))
         # ----------------------------------------------------------------------------------------------
 
         # Configure and pack the edit button ------------
@@ -562,9 +563,9 @@ class GUI:
         employees = {}
         for employee in self.current_user.access.admin_read_all_users():
             # Skips the admin user
-            if employee[1] == "admin_user":
+            if employee["admin_status"] == 1:
                 continue
-            employees.update({employee[1]: employee[0]})
+            employees.update({employee['username']: employee['student_id']})
 
         # Dropdown of the available employees
         select_employee_dropdown: ttk.Combobox = ttk.Combobox(
@@ -760,8 +761,8 @@ class GUI:
 
         # Goes through the list of users and extracts their PINs
         for user in self.current_user.access.admin_read_all_users():
-            active_pins.append(user[0])
-            active_usernames.append(user[1])
+            active_pins.append(user['student_id'])
+            active_usernames.append(user['username'])
 
         # Checks for possible PIN errors from the user
         if len(pin) != 4:
@@ -879,7 +880,7 @@ class GUI:
         all_users = self.current_user.access.admin_read_all_users()
         values = {}
         for user in all_users:
-            values[user[1]] = user[0]
+            values[user["username"]] = user["student_id"]
 
         employee_combobox: ttk.Combobox = ttk.Combobox(
             report_window,
@@ -987,7 +988,6 @@ class GUI:
         """
 
         employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        print(employee)
     # ----------------------------------------------------
 
     # Backend functions
