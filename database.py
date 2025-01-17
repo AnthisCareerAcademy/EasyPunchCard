@@ -1,10 +1,14 @@
 import sqlite3
 import requests, json
 from pandas import read_sql_query
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class SqlAccess:
     link = "https://myfwcs.fortwayneschools.org/punchcard"
-    xapikey = ""
+    xapikey = os.getenv("X_API")
     userEndpoint = "/user"
     usersEndpoint = "/users"
     userexistsEndpoint = "/userexists"
