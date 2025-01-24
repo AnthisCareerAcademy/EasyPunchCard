@@ -999,31 +999,25 @@ class GUI:
 
         # Check if the username and PIN fields are fulfilled
         if self.pin.get():
-
-            # Temporary access to admin panel
-            if self.pin.get() == "0000":
-                self.current_user = User(self.pin.get())
-                # self.current_user.access.add_user(1010, "luis", 0)
-                # self.current_user.access.add_user(2020, "jackson", 0)
-                # self.current_user.access.add_user(3030, "aung", 0)
-                # self.current_user.access.add_user(4040, "obeth", 0)
-                # self.current_user.access.add_user(5050, "martin", 0)
-                # self.current_user.access.add_user(6060, "logan", 0)
-                self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
-            else:
-
-                # Checks if the credentials are in the database
-                try:
-                    self.current_user = User(self.pin.get())
-                    if self.current_user.access.get_data_all_users("working_status") == 1:
-                        self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
-                    else:
-                        self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
-
-                # Warns the user if the credentials are incorrect
-                except ValueError:
+            try:
+                user = User(self.pin.get())
+            except ValueError:
                     messagebox.showwarning("User Error", "User does not exist")
                     self.pin.set("")
+                    return
+
+            admin_status = user.access.admin_status
+            if admin_status == 1:
+                self.current_user = User(self.pin.get())
+                self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+            elif admin_status == 0:
+                # Checks if the credentials are in the database
+                self.current_user = User(self.pin.get())
+                if self.current_user.access.get_data_all_users("working_status") == 1:
+                    self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
+                else:
+                    self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
+
         else:
             # Resets the log in screen
             self.pin.set("")
