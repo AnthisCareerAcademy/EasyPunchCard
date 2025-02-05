@@ -21,8 +21,11 @@ jobs:
       with:
         python-version: '3.12'
 
+    - name: Set API key in environment
+      run: echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+
     - name: Create .env file
-      run: echo "X_API=${{ secrets.API_KEY }}" > .env
+      run: echo "X_API=$API_KEY" > .env
 
     - name: Install dependencies
       run: |
