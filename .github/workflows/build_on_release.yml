@@ -24,14 +24,11 @@ jobs:
     - name: Set API key in environment
       run: echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
 
-    - name: Create .env file
-      run: echo "X_API=$API_KEY" > .env
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
     - name: Build On Windows
       run: |
         echo "Building on Windows"
@@ -49,10 +46,9 @@ jobs:
         # Build Installer
         iscc build_instructions/easypunchcard_setup_script.iss
 
-        # delete all artifacts except 
+        # delete all artifacts except the setup exe
         powershell -Command "Get-ChildItem 'dist' -File | Where-Object { $_.Name -ne 'EasyPunchCard_setup.exe' } | Remove-Item"
 
-    
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -69,3 +65,8 @@ jobs:
         asset_path: dist/EasyPunchCard_setup.exe  # Replace with actual artifact name
         asset_name: EasyPunchCard.exe  # Replace with actual artifact name
         asset_content_type: application/octet-stream
+
+    - name: Create .env file (using API_KEY)
+      run: |
+        echo "X_API=$API_KEY" > .env
+        echo ".env file created with API_KEY"
