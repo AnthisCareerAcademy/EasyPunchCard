@@ -23,8 +23,11 @@ jobs:
 
     - name: Set API key in environment
       run: |
-        $Env:API_KEY = '${{ secrets.API_KEY }}'
-        echo "API_KEY=$Env:API_KEY" >> $Env:GITHUB_ENV
+        echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+
+    - name: Set PowerShell Execution Policy to Bypass
+      run: |
+        Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
     - name: Install dependencies
       run: |
@@ -70,5 +73,5 @@ jobs:
 
     - name: Create .env file (using API_KEY)
       run: |
-        echo "X_API=$Env:API_KEY" > .env
+        echo "X_API=$env:API_KEY" > .env
         echo ".env file created with API_KEY"
