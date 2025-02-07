@@ -22,7 +22,9 @@ jobs:
         python-version: '3.12'
 
     - name: Set API key in environment
-      run: echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+      run: |
+        $Env:API_KEY = '${{ secrets.API_KEY }}'
+        echo "API_KEY=$Env:API_KEY" >> $Env:GITHUB_ENV
 
     - name: Install dependencies
       run: |
@@ -33,7 +35,7 @@ jobs:
       run: |
         echo "Building on Windows"
         
-        # Set-up chocolatey
+        # Set up Chocolatey
         Set-ExecutionPolicy AllSigned
         Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
@@ -46,7 +48,7 @@ jobs:
         # Build Installer
         iscc build_instructions/easypunchcard_setup_script.iss
 
-        # delete all artifacts except the setup exe
+        # Delete all artifacts except the setup exe
         powershell -Command "Get-ChildItem 'dist' -File | Where-Object { $_.Name -ne 'EasyPunchCard_setup.exe' } | Remove-Item"
 
     - name: Upload build artifacts
@@ -62,11 +64,11 @@ jobs:
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: dist/EasyPunchCard_setup.exe  # Replace with actual artifact name
-        asset_name: EasyPunchCard.exe  # Replace with actual artifact name
+        asset_path: dist/EasyPunchCard_setup.exe
+        asset_name: EasyPunchCard.exe
         asset_content_type: application/octet-stream
 
     - name: Create .env file (using API_KEY)
       run: |
-        echo "X_API=$API_KEY" > .env
+        echo "X_API=$Env:API_KEY" > .env
         echo ".env file created with API_KEY"
