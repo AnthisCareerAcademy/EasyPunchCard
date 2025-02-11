@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "EasyPunchCard"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "FWCS Career Academy"
 #define MyAppURL "https://careeracademy.fortwayneschools.org/"
 #define MyAppExeName "EasyPunchCard.exe"
