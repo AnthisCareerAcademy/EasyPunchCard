@@ -9,11 +9,11 @@ import subprocess
 class Report():
     def __init__(self, unique_id):
         self.access = SqlAccess(unique_id)
-        self.directory = "Reports"
+        documents_path = os.path.expanduser("~/Documents")
+        self.directory = os.path.join(documents_path, "Reports")
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 
-    # broken
     @staticmethod
     def calculate_number_of_pages(data):
         """
@@ -21,7 +21,7 @@ class Report():
         """
         items_per_page = (615 - 40) // 16
         total_pages = (len(data) + items_per_page - 1) // items_per_page
-        return total_pages + 1
+        return total_pages
 
     def create_class_pdf(self, file_name, company_name, title):
         # Initialize necessary variables
