@@ -289,7 +289,7 @@ class GUI:
 
         # Set the columns and initializing the employees table ---------------------------------------------
         columns: tuple[str, str, str, str, str, str, str] = (
-            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
+            "Student ID", "Full Name", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
         employees_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
@@ -408,7 +408,7 @@ class GUI:
         )
 
         # Textbox in which the student's PIN will be hosted
-        pin_entry.insert(0, "PIN - (4 digits)")  # Prepopulate with "PIN"
+        pin_entry.insert(0, "Student ID")  # Prepopulate with "PIN"
         pin_entry.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
         pin_entry.bind("<FocusIn>", lambda clicked: pin_entry.delete(0, tk.END))
 
@@ -427,7 +427,7 @@ class GUI:
             top_frame,
             font=("Roboto", 20)
         )
-        username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
+        username_entry.insert(0, "Full Name")  # Prepopulate with "Username"
         username_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
         username_entry.bind("<FocusIn>", lambda clicked: username_entry.delete(0, tk.END))
 
@@ -765,8 +765,8 @@ class GUI:
             active_usernames.append(user['username'])
 
         # Checks for possible PIN errors from the user
-        if len(pin) != 4:
-            messagebox.showwarning("PIN Error", "Your PIN needs to be 4 digits")
+        if len(pin) != 9:
+            messagebox.showwarning("PIN Error", "Your Student ID needs to be 9 digits")
             return
         elif not pin.isdigit():
             messagebox.showwarning("PIN Error", "Your PIN cannot have letters only numbers are allowed")
