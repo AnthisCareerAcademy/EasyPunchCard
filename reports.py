@@ -86,11 +86,33 @@ class Report():
         # Initialize necessary variables
         current_time = datetime.now()
         current_time = current_time.strftime("%m/%d/%Y %I:%M:%S %p")
+        clock_format = "%b %d %Y %I:%M%p"
+        date_format = '%m/%d/%Y'
+        string_start_date = start_date
+        string_end_date = end_date
+        start_date = datetime.strptime(start_date, date_format)
+        end_date = datetime.strptime(end_date, date_format)
         page_num = 1
         y_pos = 605
         data = self.access.admin_read_user_history(student_id)
         print(data)
-        clock_format = "%b %d %Y %I:%M%p"
+        filtered_data = []
+    
+        for session in data:
+            try:
+                # Convert the string to a datetime object
+                session_start_time = datetime.strptime(session['start_time'], clock_format)
+            except ValueError:
+                continue
+            
+            # Check if the start_time is within the given range
+            if start_date <= session_start_time <= end_date:
+                filtered_data.append(session)
+        
+        # sort data by start_time
+        filtered_data.sort(key=lambda x: datetime.strptime(x['start_time'], clock_format))
+
+        print(filtered_data)
 
         # Set up the canvas
         c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)
@@ -103,7 +125,7 @@ class Report():
 
         # Date
         c.setFont("Helvetica-Bold", 14)
-        c.drawString(30, 690, f"{start_date} - {end_date}")
+        c.drawString(30, 690, f"{string_start_date} - {string_end_date}")
 
         # Username
         c.setFont("Helvetica-Bold", 12)
@@ -121,20 +143,15 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 622, 525, 622)
 
-        total_pages = self.calculate_number_of_pages(data) # issue is probably because the data type changed
+        total_pages = self.calculate_number_of_pages(data) 
 
         # First page set up
         c.setFont("Helvetica", 10)
         c.drawString(520, 30, f"Page {page_num} of {total_pages}")
         c.drawString(30, 30, current_time)
 
-        # Convert start and end dates to datetime
-        date_format = '%m/%d/%Y'
-        start_date = datetime.strptime(start_date, date_format)
-        end_date = datetime.strptime(end_date, date_format)
-
         # Loop through all names and total minutes
-        for row in data:
+        for row in filtered_data:
             # Goes to the next item if the start time is empty
             if not row['start_time']:
                 continue
