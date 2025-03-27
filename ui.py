@@ -156,7 +156,9 @@ class GUI:
         """
 
         # Title ------------------------------------------
-        username = self.current_user.access.get_data_all_users("username").title()
+        fname = self.current_user.access.get_data_all_users("first_name").title()
+        lname = self.current_user.access.get_data_all_users("last_name").title()
+        username = fname + " " + lname
         title_label: ttk.Label = ttk.Label(
             self.clock_in_frame,
             text=f"{username} is logged in",
@@ -223,7 +225,9 @@ class GUI:
                 """
 
         # Title ------------------------------------------
-        username = self.current_user.access.get_data_all_users("username").title()
+        fname = self.current_user.access.get_data_all_users("first_name").title()
+        lname = self.current_user.access.get_data_all_users("last_name").title()
+        username = fname + " " + lname
         title_label: ttk.Label = ttk.Label(
             self.clock_in_frame,
             text=f"{username.title()} is logged in",
@@ -288,8 +292,8 @@ class GUI:
         # ----------------------------------------------
 
         # Set the columns and initializing the employees table ---------------------------------------------
-        columns: tuple[str, str, str, str, str, str, str] = (
-            "Student ID", "Full Name", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
+        columns: tuple[str, str, str, str, str, str, str, str] = (
+            "Student ID", "First Name", "Last Name", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
         employees_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
@@ -301,6 +305,7 @@ class GUI:
         # Insert Employees below -----------------------------------------------------------------------
         all_employees = self.current_user.access.admin_read_all_users()
         for employee in all_employees:
+            print(employee)
             del employee["end_time"]
             employees_table.insert("", "end", values=list(employee.values()))
         # ----------------------------------------------------------------------------------------------
@@ -419,17 +424,26 @@ class GUI:
         )
 
         grad_entry.insert(0, "Grad Year - YYYY")  # Prepopulate with "PIN"
-        grad_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
+        grad_entry.grid(row=1, column=3, sticky="nsew", pady=5, padx=5)
         grad_entry.bind("<FocusIn>", lambda clicked: grad_entry.delete(0, tk.END))
 
         # Textbox in which the student's username will be hosted
-        username_entry = ttk.Entry(
+        fname_entry = ttk.Entry(
             top_frame,
             font=("Roboto", 20)
         )
-        username_entry.insert(0, "Full Name")  # Prepopulate with "Username"
-        username_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
-        username_entry.bind("<FocusIn>", lambda clicked: username_entry.delete(0, tk.END))
+        fname_entry.insert(0, "First Name")  # Prepopulate with "first name"
+        fname_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
+        fname_entry.bind("<FocusIn>", lambda clicked: fname_entry.delete(0, tk.END))
+
+        # last name
+        lname_entry = ttk.Entry(
+            top_frame,
+            font=("Roboto", 20)
+        )
+        lname_entry.insert(0, "First Name")  # Prepopulate with "first name"
+        lname_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
+        lname_entry.bind("<FocusIn>", lambda clicked: lname_entry.delete(0, tk.END))
 
         # Creates the
         buttons_frame: ttk.Frame = ttk.Frame(top_frame)
@@ -456,7 +470,7 @@ class GUI:
             relief="flat",
             bd=0,
             cursor="hand2",
-            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get(), grad_entry.get())
+            command=lambda: self.add_employee_request(pin_entry.get(), fname_entry.get(), lname_entry.get(), grad_entry.get())
         )
 
         add_button.grid(row=1, column=1, sticky="ew")
@@ -565,7 +579,8 @@ class GUI:
             # Skips the admin user
             if employee["admin_status"] == 1:
                 continue
-            employees.update({employee['username']: employee['student_id']})
+            username = employee["first_name"] + " " + employee["last_name"]
+            employees.update({username: employee['student_id']})
 
         # Dropdown of the available employees
         select_employee_dropdown: ttk.Combobox = ttk.Combobox(
@@ -753,20 +768,21 @@ class GUI:
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def add_employee_request(self, pin: str, username: str, grad_year: str):
+    def add_employee_request(self, pin: str, first_name: str, last_name: str, grad_year: str):
 
         # Creates a list to store the active PINs in the database
         active_pins: list[str] = []
         active_usernames: list[str] = []
+        username = first_name + " " + last_name
 
         # Goes through the list of users and extracts their PINs
         for user in self.current_user.access.admin_read_all_users():
             active_pins.append(user['student_id'])
-            active_usernames.append(user['username'])
+            active_usernames.append(user["first_name"] + " " + user["last_name"])
 
         # Checks for possible PIN errors from the user
-        if len(pin) != 9:
-            messagebox.showwarning("PIN Error", "Your Student ID needs to be 9 digits")
+        if len(pin) < 7:
+            messagebox.showwarning("PIN Error", "Your Student ID needs to be at least 7 digits")
             return
         elif not pin.isdigit():
             messagebox.showwarning("PIN Error", "Your PIN cannot have letters only numbers are allowed")
@@ -776,11 +792,11 @@ class GUI:
             return
 
         # Checks for possible username errors from the user
-        if not username:
-            messagebox.showwarning("USERNAME Error", "Your username cannot be empty")
+        if not first_name or not last_name:
+            messagebox.showwarning("USERNAME Error", "Your firstname or lastname cannot be empty")
             return
         elif username in active_usernames:
-            messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
+            messagebox.showwarning("USERNAME Error", f"Another user exists with the same NAME: {username}")
             return
 
         try:
@@ -795,7 +811,7 @@ class GUI:
             messagebox.showwarning("Graduation Year Error", f"Your Graduation year cannot be less than {datetime.today().year}")
             return
 
-        self.current_user.access.add_user(pin, username, 0, grad_year_int)
+        self.current_user.access.add_user(pin, first_name, last_name, 0, grad_year_int)
         messagebox.showinfo("User Addition", f"{username} Has been added to the database")
         self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
 
@@ -880,7 +896,10 @@ class GUI:
         all_users = self.current_user.access.admin_read_all_users()
         values = {}
         for user in all_users:
-            values[user["username"]] = user["student_id"]
+            fname = user["first_name"]
+            lname = user["last_name"]
+            username = fname + " " + lname
+            values[username] = user["student_id"]
 
         employee_combobox: ttk.Combobox = ttk.Combobox(
             report_window,

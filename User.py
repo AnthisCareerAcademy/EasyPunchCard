@@ -18,7 +18,6 @@ class User:
         ValueError: If the user does not exist in the database.
     """
     
-    # default admin is unique_id = 0000
     def __init__(self, unique_id: str) -> None:
         """
         Initialize a new User object and check if the user exists in the database.

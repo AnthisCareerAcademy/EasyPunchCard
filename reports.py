@@ -72,7 +72,8 @@ class Report():
                 y_pos = 730
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
-            c.drawString(80, y_pos, row["username"])
+            username = row["first_name"] + " " + row["last_name"]
+            c.drawString(80, y_pos, username)
             hours = row["total_minutes"] // 60
             minutes = row["total_minutes"] % 60
             c.drawCentredString(360, y_pos, f"{hours}:{minutes}")
