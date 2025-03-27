@@ -96,7 +96,6 @@ class Report():
         page_num = 1
         y_pos = 605
         data = self.access.admin_read_user_history(student_id)
-        print(data)
         filtered_data = []
     
         for session in data:
@@ -112,8 +111,6 @@ class Report():
         
         # sort data by start_time
         filtered_data.sort(key=lambda x: datetime.strptime(x['start_time'], clock_format))
-
-        print(filtered_data)
 
         # Set up the canvas
         c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)

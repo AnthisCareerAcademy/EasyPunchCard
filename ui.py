@@ -304,8 +304,9 @@ class GUI:
 
         # Insert Employees below -----------------------------------------------------------------------
         all_employees = self.current_user.access.admin_read_all_users()
-        for employee in all_employees:
-            print(employee)
+        # Sort by last name
+        sorted_all_employees = sorted(all_employees, key=lambda x: x['last_name'])
+        for employee in sorted_all_employees:
             del employee["end_time"]
             employees_table.insert("", "end", values=list(employee.values()))
         # ----------------------------------------------------------------------------------------------
@@ -441,7 +442,7 @@ class GUI:
             top_frame,
             font=("Roboto", 20)
         )
-        lname_entry.insert(0, "First Name")  # Prepopulate with "first name"
+        lname_entry.insert(0, "Last Name")  # Prepopulate with "last name"
         lname_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
         lname_entry.bind("<FocusIn>", lambda clicked: lname_entry.delete(0, tk.END))
 
@@ -585,7 +586,7 @@ class GUI:
         # Dropdown of the available employees
         select_employee_dropdown: ttk.Combobox = ttk.Combobox(
             top_frame,
-            values=list(employees.keys()),
+            values=list(sorted(employees.keys())),
             font=("Roboto", 25, "bold")
         )
 
