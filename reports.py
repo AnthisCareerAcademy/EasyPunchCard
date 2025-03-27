@@ -72,7 +72,8 @@ class Report():
                 y_pos = 730
             # Name and total hours:minutes
             c.setFont("Helvetica", 12)
-            c.drawString(80, y_pos, row["username"])
+            username = row["first_name"] + " " + row["last_name"]
+            c.drawString(80, y_pos, username)
             hours = row["total_minutes"] // 60
             minutes = row["total_minutes"] % 60
             c.drawCentredString(360, y_pos, f"{hours}:{minutes}")
@@ -95,7 +96,6 @@ class Report():
         page_num = 1
         y_pos = 605
         data = self.access.admin_read_user_history(student_id)
-        print(data)
         filtered_data = []
     
         for session in data:
@@ -111,8 +111,6 @@ class Report():
         
         # sort data by start_time
         filtered_data.sort(key=lambda x: datetime.strptime(x['start_time'], clock_format))
-
-        print(filtered_data)
 
         # Set up the canvas
         c = canvas.Canvas(f"{self.directory}/{file_name}.pdf", pagesize=letter)

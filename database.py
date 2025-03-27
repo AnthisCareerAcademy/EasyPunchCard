@@ -59,13 +59,14 @@ class SqlAccess:
         jsonValue = json.loads(response.text)
         return jsonValue
 
-    def add_user(self, student_id:str, username:str, admin_status:int, graduation_year: int):
+    def add_user(self, student_id:str, first_name:str, last_name:str, admin_status:int, graduation_year: int):
         """
         Allows admin users to add users to the database
 
         Args:
             student_id (str): The student id of the user being added (can't used already)
-            username (str): The username of the user being added to the database
+            first_name (str): The firstname of the user being added to the database
+            last_name (str): The lastname of the user being added to the database
             admin_status (int): The admin status of the user being added (only 1 or 0)
             graduation_year (int): The graduation year of the user being added
 
@@ -79,7 +80,8 @@ class SqlAccess:
         if admin_status == 0:
             data = {
                 "student_id": student_id,
-                "username": username,
+                "first_name": first_name,
+                "last_name": last_name,
                 "admin_status": admin_status,
                 "graduation_year": graduation_year
             }
@@ -89,7 +91,8 @@ class SqlAccess:
         elif admin_status == 1:
             data = {
                 "student_id": student_id,
-                "username": username,
+                "first_name": first_name,
+                "last_name": last_name,
                 "admin_status": admin_status,
                 "graduation_year": 0000
             }
