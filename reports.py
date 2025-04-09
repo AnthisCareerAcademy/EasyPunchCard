@@ -42,7 +42,7 @@ class Report():
 
         # Header
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(75, 650, 'Employee')
+        c.drawString(75, 650, 'Student')
         c.drawString(320, 650, 'Hours:Minutes')
 
         # Draw the horizontal line below the header
