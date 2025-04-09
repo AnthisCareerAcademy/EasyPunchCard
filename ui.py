@@ -304,8 +304,11 @@ class GUI:
 
         # Insert students below -----------------------------------------------------------------------
         all_students = self.current_user.access.admin_read_all_users()
-        # Sort by last name
-        sorted_all_students = sorted(all_students, key=lambda x: x['last_name'])
+        print(all_students)
+
+        # Group by grad year and then sorted by last name
+        sorted_all_students = sort_list(all_students)
+
         for student in sorted_all_students:
             del student["end_time"]
             students_table.insert("", "end", values=list(student.values()))
@@ -1057,6 +1060,25 @@ class GUI:
     # # Extra functions
     # def exit_fullscreen(self):
     #     self.root.attributes("-fullscreen", False)
+
+def sort_list(list):
+    """
+    Args:
+        list: list of dicts. This data would come from the return of the function admin_read_all_users
+    Return:
+        Returns a list grouped by graduation year and sorted by last name within those groupings
+    """
+    list_sorted_grad_year = sorted(list, key=lambda x: x['graduation_year'])
+    grad_years = {}
+    for student in list_sorted_grad_year:
+        year = student['graduation_year']
+        if year not in grad_years:
+            grad_years[year] = []
+        grad_years[year].append(student)
+    for year in grad_years:
+        grad_years[year] = sorted(grad_years[year], key=lambda x: x['last_name'])
+    flattened_list = [student for year in grad_years.values() for student in year]
+    return flattened_list
 
 
 gui = GUI()
