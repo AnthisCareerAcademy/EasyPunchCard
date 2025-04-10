@@ -14,15 +14,6 @@ class Report():
         if not os.path.exists(self.directory):
             os.makedirs(self.directory)
 
-    @staticmethod
-    def calculate_number_of_pages(data):
-        """
-        Calculating number of pages the report will have
-        """
-        items_per_page = (615 - 40) // 16
-        total_pages = (len(data) + items_per_page - 1) // items_per_page
-        return total_pages
-
     def create_class_pdf(self, file_name, company_name, title):
         # Initialize necessary variables
         current_time = datetime.now()
@@ -50,11 +41,9 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 645, 525, 645)
 
-        total_pages = self.calculate_number_of_pages(data)
-
         # First page set up
         c.setFont("Helvetica", 10)
-        c.drawString(520, 30, f"Page {page_num} of {total_pages}")
+        c.drawString(520, 30, f"Page {page_num}")
         c.drawString(30, 30, current_time)
 
         # Loop through all names and total minutes
@@ -65,7 +54,7 @@ class Report():
                 page_num += 1
                 c.setFont("Helvetica", 10)
                 # Page number
-                c.drawString(520, 30, f"Page {page_num} of {total_pages}")
+                c.drawString(520, 30, f"Page {page_num}")
                 # Date/time
                 c.drawString(30, 30, current_time)
                 # Reset y position to top of next page
@@ -141,11 +130,9 @@ class Report():
         c.setLineWidth(2)
         c.line(65, 622, 525, 622)
 
-        total_pages = self.calculate_number_of_pages(data) 
-
         # First page set up
         c.setFont("Helvetica", 10)
-        c.drawString(520, 30, f"Page {page_num} of {total_pages}")
+        c.drawString(520, 30, f"Page {page_num}")
         c.drawString(30, 30, current_time)
 
         # Loop through all names and total minutes
@@ -159,7 +146,7 @@ class Report():
                 page_num += 1
                 c.setFont("Helvetica", 10)
                 # Page number
-                c.drawString(520, 30, f"Page {page_num} of {total_pages}")
+                c.drawString(520, 30, f"Page {page_num}")
                 # Date/time
                 c.drawString(30, 30, current_time)
                 # Reset y position to top of next page
