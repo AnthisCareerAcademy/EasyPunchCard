@@ -308,7 +308,6 @@ class GUI:
 
         # Insert students below -----------------------------------------------------------------------
         all_students = self.current_user.access.admin_read_all_users()
-        print(all_students)
 
         # Group by grad year and then sorted by last name
         sorted_all_students = sort_list(all_students)
