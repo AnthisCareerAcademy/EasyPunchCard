@@ -887,7 +887,7 @@ class GUI:
             fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_class_button.pack(pady=20)
-        # --------------------------------------------------------------
+        # ---------------------------------------------------------------
     
     def create_individual_reports_screen(self):
         # file name text input
