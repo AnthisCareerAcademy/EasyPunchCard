@@ -769,6 +769,7 @@ class GUI:
         # messagebox.showinfo("Hours", "You currently have 32hrs")
         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
         self.current_user.clock.clock_in()
+        self.log_out()
 
     def clock_out(self):
         self.current_user.clock.clock_out()
