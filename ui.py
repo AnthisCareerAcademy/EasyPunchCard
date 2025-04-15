@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 
 from User import User
+from time import sleep
 
 class GUI:
     def __init__(self):
@@ -276,6 +277,17 @@ class GUI:
 
         log_out_button.pack(anchor="center", pady=10)
         # ----------------------------------------------------------
+        # Gets the user hours and writes them in a label --------------------------------------------
+        total_minutes: int = self.current_user.access.get_data_all_users("total_minutes")
+        hours: int = total_minutes // 60
+        minutes: float = total_minutes % 60
+        hours_label: ttk.Label = ttk.Label(
+            self.clock_in_frame,
+            text=f"Total Time: {hours}h{minutes}m",
+            font=("Roboto", 80, "bold"),
+            foreground="#000000"
+        )
+        hours_label.pack(expand=True)
 
     def create_admin_panel_screen(self):
         """
@@ -774,6 +786,7 @@ class GUI:
     def clock_out(self):
         self.current_user.clock.clock_out()
         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
+        self.log_out() 
     # -----------------------------------------------------
 
     # Admin methods --------------------------------------
