@@ -34,7 +34,9 @@ class GUI:
         self.log_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.clock_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.admin_frame: ttk.Frame = ttk.Frame(self.root)
-        self.reports_frame: ttk.Frame = ttk.Frame(self.root)
+        self.reports_selection_frame = ttk.Frame(self.root)
+        self.class_reports_frame: ttk.Frame = ttk.Frame(self.root)
+        self.individual_reports_frame: ttk.Frame = ttk.Frame(self.root)
         self.student_management_frame: ttk.Frame = ttk.Frame(self.root)
 
         # Admin Windows
@@ -47,7 +49,9 @@ class GUI:
             "log_in_frame": self.log_in_frame,
             "clock_in_frame": self.clock_in_frame,
             "admin_frame": self.admin_frame,
-            "reports_frame": self.reports_frame,
+            'reports_selection_frame': self.reports_selection_frame,
+            "class_reports_frame": self.class_reports_frame,
+            "individual_reports_frame": self.individual_reports_frame,
             "student_management_frame": self.student_management_frame,
             "add_student_frame": self.add_student_frame,
         }
@@ -293,7 +297,7 @@ class GUI:
 
         # Set the columns and initializing the student table ---------------------------------------------
         columns: tuple[str, str, str, str, str, str, str, str] = (
-            "Student ID", "First Name", "Last Name", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
+            "Student ID", "First Name", "Last Name", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
         students_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
@@ -304,13 +308,13 @@ class GUI:
 
         # Insert students below -----------------------------------------------------------------------
         all_students = self.current_user.access.admin_read_all_users()
-        print(all_students)
 
         # Group by grad year and then sorted by last name
         sorted_all_students = sort_list(all_students)
 
         for student in sorted_all_students:
             del student["end_time"]
+            del student["admin_status"]
             students_table.insert("", "end", values=list(student.values()))
         # ----------------------------------------------------------------------------------------------
 
@@ -336,7 +340,7 @@ class GUI:
         report_button: tk.Button = tk.Button(
             self.admin_frame,
             text="Reports",
-            command=self.open_reports_window,
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame", self.create_reports_selection_screen),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -830,73 +834,107 @@ class GUI:
        except KeyError:
            messagebox.showwarning("User Error", "Please select a valid user")
 
-    def open_reports_window(self):
-        """
-        Opens a new window to view and print reports
-        :return None:
-        """
-        # Create the pop-up window for class reports------------------------------------
-        class_report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        class_report_window.title("Class Reports")
-        class_report_window.geometry("500x400")
+    def create_reports_selection_screen(self):
+        page_title = ttk.Label(
+            self.reports_selection_frame, text="Reports",font=("Roboto", 36, 'underline')
+        )
+        page_title.pack(pady=20)
 
+        class_reports_button = tk.Button(
+            self.reports_selection_frame,
+            text="Make a class report",
+            command=lambda: self.show(self.class_reports_frame, "class_reports_frame", self.create_class_reports_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        class_reports_button.pack(pady=10)
+
+        individual_reports_button = tk.Button(
+            self.reports_selection_frame,
+            text="Make an individual report",
+            command=lambda: self.show(self.individual_reports_frame, "individual_reports_frame", self.create_individual_reports_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        individual_reports_button.pack(pady=25)
+
+        # Back button
+        back_button = tk.Button(
+            self.reports_selection_frame,
+            text="Back",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 35, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
+
+    def create_class_reports_screen(self):
         # file name text input
-        class_file_name_label: ttk.Label = ttk.Label(class_report_window, text="File Name",font=("Roboto", 12))
+        class_file_name_label: ttk.Label = ttk.Label(self.class_reports_frame, text="File Name",font=("Roboto", 24))
         class_file_name_label.pack(pady=5)
-        class_file_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_file_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_file_name.pack(pady=5)
 
         # company name text input
-        class_company_name_label: ttk.Label = ttk.Label(class_report_window, text="Company Name",font=("Roboto", 12))
+        class_company_name_label: ttk.Label = ttk.Label(self.class_reports_frame, text="Class Name",font=("Roboto", 24))
         class_company_name_label.pack(pady=5)
-        class_company_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_company_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_company_name.pack(pady=5)
 
         # title text input
-        class_title_label: ttk.Label = ttk.Label(class_report_window, text="Title Name",font=("Roboto", 12))
+        class_title_label: ttk.Label = ttk.Label(self.class_reports_frame, text="Title Name",font=("Roboto", 24))
         class_title_label.pack(pady=5)
-        class_title_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_title_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_title_name.pack(pady=5)
 
         # Print class report button
         print_class_button: tk.Button = tk.Button(
-            class_report_window,
+            self.class_reports_frame,
             text="Print All Users Report",
             command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get()),
             bg="#00796B",
-            fg="white", font=("Roboto", 12, "bold"),
+            fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_class_button.pack(pady=20)
-        # --------------------------------------------------------------
 
-
-        # Create the pop-up window for small reports------------------------------------
-        report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        report_window.title("User Reports")
-        report_window.geometry("500x750")
-
+        # Back button
+        back_button = tk.Button(
+            self.class_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame", self.create_reports_selection_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
+        # ---------------------------------------------------------------
+    
+    def create_individual_reports_screen(self):
         # file name text input
-        file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        file_name_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="File Name",font=("Roboto", 20))
         file_name_label.pack(pady=5)
 
-        file_name: tk.Entry = tk.Entry(report_window, width=20)
+        file_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         file_name.pack(pady=5)
 
         # company name text input
-        company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        company_name_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Class Name",font=("Roboto", 20))
         company_name_label.pack(pady=5)
-        company_name: tk.Entry = tk.Entry(report_window, width=20)
+        company_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         company_name.pack(pady=5)
 
         # title text input
-        title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        title_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Title Name",font=("Roboto", 20))
         title_label.pack(pady=5)
-        title_name: tk.Entry = tk.Entry(report_window, width=20)
+        title_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         title_name.pack(pady=5)
 
         # student dropdown
-        student_label: ttk.Label = ttk.Label(report_window, text="Select student", font=("Roboto", 12))
-        student_label.pack(pady=10)
+        student_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Select student", font=("Roboto", 20))
+        student_label.pack(pady=5)
 
         all_users = self.current_user.access.admin_read_all_users()
         values = {}
@@ -907,29 +945,30 @@ class GUI:
             values[username] = user["student_id"]
 
         student_combobox: ttk.Combobox = ttk.Combobox(
-            report_window,
-            values=list(values))
+            self.individual_reports_frame,
+            values=list(values),
+            font=20)
         
-        student_combobox.pack(pady=5)
+        student_combobox.pack(pady=20)
 
         # date range selection
-        self.cal = Calendar(report_window, selectmode='day', year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
-        self.cal.pack(pady=20)
+        self.cal = Calendar(self.individual_reports_frame, selectmode='day', year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
+        self.cal.pack()
 
         self.start_date = None
         self.end_date = None
         
-        self.feedback_label = ttk.Label(report_window, text="")
-        self.feedback_label.pack(pady=10)
+        self.feedback_label = ttk.Label(self.individual_reports_frame, text="")
+        self.feedback_label.pack()
 
         # start date button
         start_date_button: tk.Button = tk.Button(
-            report_window, 
+            self.individual_reports_frame, 
             text="Set Start Date", 
             command=self.set_start_date,
             bg = "#00796B",
             fg = "white",
-            font = ("Roboto", 12, "bold"),
+            font = ("Roboto", 16, "bold"),
             relief = "flat",
             bd = 0,
             height = 1,
@@ -939,38 +978,50 @@ class GUI:
         
         # end date button
         end_date_button: tk.Button = tk.Button(
-            report_window, 
+            self.individual_reports_frame, 
             text="Set End Date", 
             command=self.set_end_date,
             bg="#00796B",
             fg="white",
-            font=("Roboto", 12, "bold"),
+            font=("Roboto", 16, "bold"),
             relief="flat",
             bd=0,
             height=1,
             width=15,
             )
-        end_date_button.pack(pady=10)
+        end_date_button.pack(pady=8)
 
         # print specific user report button
         print_specific_user_button: tk.Button = tk.Button(
-            report_window,
+            self.individual_reports_frame,
             text="Print Specific User Report",
             command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), self.start_date.strftime('%m/%d/%Y'), self.end_date.strftime('%m/%d/%Y'), student_combobox.get(), str(values[student_combobox.get()])),
             bg="#00796B",
-            fg="white", font=("Roboto", 12, "bold"),
+            fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_specific_user_button.pack(pady=20)
 
-        # --------------------------------------------------------------
+        back_button = tk.Button(
+            self.individual_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame", self.create_reports_selection_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
 
     def print_class_report(self, file_name, company_name, title):
         """creates class report in a folder called Reports"""
         self.current_user.report.create_class_pdf(file_name, company_name, title)
+        messagebox.showinfo("Info", "Class Report has been created. It is located in Documents/Reports.")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
         """creates a user report in the same Reports folder"""
         self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
+        messagebox.showinfo("Info", "User Specific Report has been created. It is located in Documents/Reports.")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def set_start_date(self):
         self.start_date = datetime.strptime(self.cal.get_date(), "%m/%d/%y")
