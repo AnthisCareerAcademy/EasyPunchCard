@@ -857,7 +857,18 @@ class GUI:
             fg="white", font=("Roboto", 28, "bold"),
             relief="flat", bd=0
         )
-        individual_reports_button.pack(pady=10)
+        individual_reports_button.pack(pady=25)
+
+        # Back button
+        back_button = tk.Button(
+            self.reports_selection_frame,
+            text="Back",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 35, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
 
     def create_class_reports_screen(self):
         # file name text input
@@ -887,6 +898,17 @@ class GUI:
             fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_class_button.pack(pady=20)
+
+        # Back button
+        back_button = tk.Button(
+            self.class_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame", self.create_reports_selection_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
         # ---------------------------------------------------------------
     
     def create_individual_reports_screen(self):
@@ -911,7 +933,7 @@ class GUI:
 
         # student dropdown
         student_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Select student", font=("Roboto", 20))
-        student_label.pack(pady=10)
+        student_label.pack(pady=5)
 
         all_users = self.current_user.access.admin_read_all_users()
         values = {}
@@ -926,17 +948,17 @@ class GUI:
             values=list(values),
             font=20)
         
-        student_combobox.pack(pady=5)
+        student_combobox.pack(pady=20)
 
         # date range selection
         self.cal = Calendar(self.individual_reports_frame, selectmode='day', year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
-        self.cal.pack(pady=15)
+        self.cal.pack()
 
         self.start_date = None
         self.end_date = None
         
         self.feedback_label = ttk.Label(self.individual_reports_frame, text="")
-        self.feedback_label.pack(pady=10)
+        self.feedback_label.pack()
 
         # start date button
         start_date_button: tk.Button = tk.Button(
@@ -966,7 +988,7 @@ class GUI:
             height=1,
             width=15,
             )
-        end_date_button.pack(pady=15)
+        end_date_button.pack(pady=8)
 
         # print specific user report button
         print_specific_user_button: tk.Button = tk.Button(
@@ -977,6 +999,16 @@ class GUI:
             fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_specific_user_button.pack(pady=20)
+
+        back_button = tk.Button(
+            self.individual_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame", self.create_reports_selection_screen),
+            bg="#eb4034",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
 
     def print_class_report(self, file_name, company_name, title):
         """creates class report in a folder called Reports"""
