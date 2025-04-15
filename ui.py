@@ -981,11 +981,13 @@ class GUI:
     def print_class_report(self, file_name, company_name, title):
         """creates class report in a folder called Reports"""
         self.current_user.report.create_class_pdf(file_name, company_name, title)
+        messagebox.showinfo("Info", "Class Report has been created. It is located in Documents/Reports.")
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
         """creates a user report in the same Reports folder"""
         self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
+        messagebox.showinfo("Info", "User Specific Report has been created. It is located in Documents/Reports.")
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def set_start_date(self):
