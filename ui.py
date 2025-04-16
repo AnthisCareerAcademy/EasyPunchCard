@@ -409,6 +409,7 @@ class GUI:
         top_frame.columnconfigure(0, weight=3)
         top_frame.columnconfigure(1, weight=3)
         top_frame.columnconfigure(2, weight=3)
+        top_frame.columnconfigure(3, weight=3)
 
         # Configuring the rows of the top child window
         top_frame.rowconfigure(0, weight=2)
@@ -419,12 +420,12 @@ class GUI:
         # title label
         title_label: ttk.Label = ttk.Label(
             top_frame,
-            text="New student",
+            text="New Student",
             font=("Roboto", 50, "bold"),
             foreground="#00796B"
         )
 
-        title_label.grid(row=0, column=0, columnspan=3)
+        title_label.grid(row=0, column=0, columnspan=4)
 
         # TextBoxes
         pin_entry = ttk.Entry(
@@ -443,7 +444,7 @@ class GUI:
             font=("Roboto", 20),
         )
 
-        grad_entry.insert(0, "Grad Year - YYYY")  # Prepopulate with "PIN"
+        grad_entry.insert(0, "Grad Year")  # Prepopulate with "PIN"
         grad_entry.grid(row=1, column=3, sticky="nsew", pady=5, padx=5)
         grad_entry.bind("<FocusIn>", lambda clicked: grad_entry.delete(0, tk.END))
 
@@ -467,12 +468,12 @@ class GUI:
 
         # Creates the
         buttons_frame: ttk.Frame = ttk.Frame(top_frame)
-        buttons_frame.grid(row=2, column=0, columnspan=3, sticky="nsew")
+        buttons_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=10)
         buttons_frame.grid_propagate(False)
 
         # Configures the frame's columns
         buttons_frame.columnconfigure(0, weight=1)
-        buttons_frame.columnconfigure(1, weight=5)
+        buttons_frame.columnconfigure(1, weight=1)
         buttons_frame.columnconfigure(2, weight=1)
 
         # Configures the frame's row
@@ -493,7 +494,7 @@ class GUI:
             command=lambda: self.add_student_request(pin_entry.get(), fname_entry.get(), lname_entry.get(), grad_entry.get())
         )
 
-        add_button.grid(row=1, column=1, sticky="ew")
+        add_button.grid(row=1, column=1, sticky="ew", columnspan=3, pady=5)
 
         reset_button: tk.Button = tk.Button(
             buttons_frame,
@@ -507,7 +508,7 @@ class GUI:
             command=lambda: self.show(self.add_student_frame, "add_student_frame", self.create_add_student_screen)
         )
 
-        reset_button.grid(row=2, column=1, sticky="ew")
+        reset_button.grid(row=2, column=1, sticky="ew", columnspan=3)
 
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
@@ -587,7 +588,7 @@ class GUI:
         # title label
         title_label: ttk.Label = ttk.Label(
             top_frame,
-            text="student Management",
+            text="Student Management",
             font=("Roboto", 50, "bold"),
             foreground="#00796B"
         )
