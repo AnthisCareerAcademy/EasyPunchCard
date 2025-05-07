@@ -325,6 +325,7 @@ class GUI:
         sorted_all_students = sort_list(all_students)
 
         for student in sorted_all_students:
+            student["total_minutes"] = sum(entry['total_minutes'] for entry in self.current_user.access.admin_read_user_history(student["student_id"]))
             del student["end_time"]
             del student["admin_status"]
             students_table.insert("", "end", values=list(student.values()))

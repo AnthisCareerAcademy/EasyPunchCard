@@ -35,18 +35,6 @@ class SqlAccess:
             # if the user doesn't exist, raise an error
             raise ValueError("User does not exist")
         
-    # REMOVE
-    @staticmethod
-    def get_db():
-        """
-        Creates a connection to the database.
-
-        Returns:
-            sqlite3.Connection: A connection object for the SQLite database.
-        """
-        conn = sqlite3.connect('EasyPunchCard.db')
-        return conn
-    
 
     def user_exists(self):
         """
@@ -58,6 +46,7 @@ class SqlAccess:
         response = requests.get( self.link + self.userexistsEndpoint + f"?student_id={self.student_id}", headers = {"x-api-key": self.xapikey} )
         jsonValue = json.loads(response.text)
         return jsonValue
+
 
     def add_user(self, student_id:str, first_name:str, last_name:str, admin_status:int, graduation_year: int):
         """
@@ -117,12 +106,6 @@ class SqlAccess:
             raise TypeError("Error: can't delete self")
         
         requests.delete(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey})
-
-
-    def update_time(self, additional_minutes:int):
-        """
-        Allows admins to add additional time to a specific user's total minutes
-        """
 
 
     def admin_read_all_users(self):
@@ -220,6 +203,34 @@ class SqlAccess:
         response = requests.get(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey})
         data = json.loads(response.text)
         return data
+    
+
+    def admin_update_historical_data(self, student_id:str, start_time:str, end_time:str):
+        """
+        allows admin to add historical clockin and clockout data
+
+        Args:
+            student_id (str): The student_id of the user who is getting historical data added
+            start_time (str): The start time of the 'clock in' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
+            end_time (str): The end time of the 'clock out' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
+        """
+        data={"student_id": student_id, "start_time": start_time, "end_time": end_time}
+
+        requests.post(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+
+
+    def admin_delete_historical_data(self, student_id:str, start_time:str):
+        """
+        allows admin to delete historical clockin and clockout data
+
+        Args:
+            student_id (str): The student_id of the user who is getting historical data added
+            start_time (str): The start time of the 'clock in' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
+        """
+        data={"student_id": student_id, "start_time": start_time}
+
+        requests.delete(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+
 
     # change to work with the api
     def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
