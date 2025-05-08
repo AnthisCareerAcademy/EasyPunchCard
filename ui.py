@@ -961,7 +961,7 @@ class GUI:
 
         student_combobox: ttk.Combobox = ttk.Combobox(
             self.individual_reports_frame,
-            values=list(values),
+            values=list(sorted(values.keys())),
             font=20)
         
         student_combobox.pack(pady=20)
