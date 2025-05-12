@@ -1,6 +1,5 @@
-import sqlite3
+import pandas as pd
 import requests, json
-from pandas import read_sql_query
 import os
 from dotenv import load_dotenv
 
@@ -232,13 +231,11 @@ class SqlAccess:
         requests.delete(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
 
-    # change to work with the api
-    def database_to_excel(self, sql_table_name:str, file_name:str="EasyPunchCard"):
+    def database_to_excel(self, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
 
         Args:
-            sql_table_name (str): SQLite table name
             file_name (str) default = "EasyPunchCard": the name of the file (default is 'EasyPunchCard')
 
         Raises:
@@ -247,8 +244,12 @@ class SqlAccess:
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         
-        query = f'SELECT * FROM {sql_table_name}'
-        conn = self.get_db()
-        df = read_sql_query(query, conn)
-        df.to_excel(f"{file_name}.xlsx", index=True)
-        conn.close()
+        documents_path = os.path.expanduser("~/Documents")
+        directory = os.path.join(documents_path, "Reports")
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        
+        data = self.admin_read_all_users()
+        
+        df = pd.DataFrame.from_dict(data)
+        df.to_excel(f"{directory}/{file_name}.xlsx")
