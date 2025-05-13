@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Label
 
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
@@ -42,7 +42,7 @@ class GUI:
         self.update_frame: ttk.Frame = ttk.Frame(self.root)
         self.add_clock_frame = ttk.Frame(self.root)
         self.delete_clock_frame = ttk.Frame(self.root)
-        self.update_user_frame = ttk.Frame(self.root)
+        self.edit_student_info_frame = ttk.Frame(self.root)
 
         # Admin Windows
         self.select_student_frame: None | ttk.Frame = None
@@ -62,7 +62,7 @@ class GUI:
             "update_frame": self.update_frame,
             "add_clock_frame": self.add_clock_frame,
             "delete_clock_frame": self.delete_clock_frame,
-            "update_student_frame": self.update_user_frame,
+            "edit_student_info_frame": self.edit_student_info_frame,
         }
 
         # Start The Program with the log in screen
@@ -745,7 +745,7 @@ class GUI:
 
     def create_update_screen(self):
         page_title = ttk.Label(
-            self.update_frame, text="Clock Management", font=("Roboto", 36, 'underline')
+            self.update_frame, text="Edit Menu", font=("Roboto", 36, 'underline')
         )
         page_title.pack(pady=20)
 
@@ -769,7 +769,18 @@ class GUI:
             fg="white", font=("Roboto", 28, "bold"),
             relief="flat", bd=0
         )
-        delete_time_button.pack(pady=25)
+        delete_time_button.pack(pady=10)
+
+        edit_student_info = tk.Button(
+            self.update_frame,
+            text="Edit Student Info",
+            command=lambda: self.show(self.edit_student_info_frame, "edit_student_info_frame",
+                                      self.create_edit_student_info_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        edit_student_info.pack(pady=10)
 
         # Back button
         back_button = tk.Button(
@@ -780,7 +791,7 @@ class GUI:
             fg="white", font=("Roboto", 35, "bold"),
             relief="flat", bd=0
         )
-        back_button.pack()
+        back_button.pack(pady=25)
 
     def create_add_clock_frame(self):
         self.add_clock_frame.columnconfigure(0, weight=1)
@@ -856,7 +867,7 @@ class GUI:
         back_button = tk.Button(
             self.add_clock_frame,
             text="Back",
-            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
             bg="#8B0000",
             fg="white", font=("Roboto", 16, "bold"),
             relief="flat", bd=0
@@ -894,15 +905,74 @@ class GUI:
         back_button = tk.Button(
             self.delete_clock_frame,
             text="Back",
-            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
             bg="#8B0000",
             fg="white", font=("Roboto", 16, "bold"),
             relief="flat", bd=0
         )
         back_button.grid(row=7, column=1)
 
-    def create_update_student_screen(self):
-        pass
+    def create_edit_student_info_screen(self):
+        self.edit_student_info_frame.columnconfigure(0, weight=1)
+        self.edit_student_info_frame.columnconfigure(1, weight=1)
+        title = ttk.Label(
+            self.edit_student_info_frame, text="Update Student Info", font=("Roboto", 36, 'underline')
+        )
+        title.grid(row=0, column=0, columnspan=2, pady=20)
+
+        grad_year = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        grad_year.grid(row=1, column=0)
+        grad_year_title = ttk.Label(
+            self.edit_student_info_frame, text="Graduation Year", font=("Roboto", 20)
+        )
+        grad_year_title.grid(row=1, column=1, pady=15)
+
+        first_name = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        first_name.grid(row=2, column=0)
+        first_name_title = ttk.Label(
+            self.edit_student_info_frame, text="First Name", font=("Roboto", 20)
+        )
+        first_name_title.grid(row=2, column=1, pady=15)
+
+        last_name = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        last_name.grid(row=3, column=0)
+        last_name_title = ttk.Label(
+            self.edit_student_info_frame, text="Last Name", font=("Roboto", 20)
+        )
+        last_name_title.grid(row=3, column=1, pady=20)
+
+        message_text = ttk.Label(
+            self.edit_student_info_frame, text="(Leave anything blank if no change)", font=("Roboto", 14)
+        )
+        message_text.grid(row=4, column=0, columnspan=2, pady=10)
+
+        submit_button = tk.Button(
+            self.edit_student_info_frame,
+            text="Submit",
+            command=lambda: self.edit_student_info(first_name, last_name, grad_year),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0)
+        submit_button.grid(row=5, column=0, columnspan=2)
+
+        back_button = tk.Button(
+            self.edit_student_info_frame,
+            text="Back",
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 16, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.grid(row=6, column=1)
 
     def submitting_clock_time(self, date, clock_in, clock_out):
         date_obj = datetime.strptime(date, "%m/%d/%y")
@@ -912,6 +982,10 @@ class GUI:
 
     def deleting_clock_time(self, selected_time):
         self.current_user.access.admin_delete_historical_data(self.current_student_id, selected_time)
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
+    def edit_student_info(self, fname, lname, grad_year):
+        self.current_user.access.admin_update_user_data(self.current_student_id, fname, lname, grad_year)
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     # Complementary Methods -----------------------------------------------
