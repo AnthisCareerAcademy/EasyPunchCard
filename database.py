@@ -199,6 +199,7 @@ class SqlAccess:
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
+        
         response = requests.get(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey})
         data = json.loads(response.text)
         return data
@@ -213,8 +214,10 @@ class SqlAccess:
             start_time (str): The start time of the 'clock in' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
             end_time (str): The end time of the 'clock out' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
         """
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        
         data={"student_id": student_id, "start_time": start_time, "end_time": end_time}
-
         requests.post(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
 
@@ -226,9 +229,22 @@ class SqlAccess:
             student_id (str): The student_id of the user who is getting historical data added
             start_time (str): The start time of the 'clock in' In the 'MM/DD/YYYY HH:MM:SS' (24-hour clock) format
         """
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
         data={"student_id": student_id, "start_time": start_time}
-
         requests.delete(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+
+
+    def admin_update_student_data(self, student_id:str, first_name:str, last_name:str, graduation_year: int):
+        """
+        allows admin to update specific user data
+        Args:
+            pass
+        """
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+        data = {"first_name": first_name, "last_name": last_name, "admin_status": None, "graduation_year": graduation_year}
+        requests.put(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
 
 
     def database_to_excel(self, file_name:str="EasyPunchCard"):
