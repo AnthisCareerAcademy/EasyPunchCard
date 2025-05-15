@@ -958,7 +958,7 @@ class GUI:
         submit_button = tk.Button(
             self.edit_student_info_frame,
             text="Submit",
-            command=lambda: self.edit_student_info(first_name.get(), last_name.get(), int(grad_year.get())),
+            command=lambda: self.edit_student_info(first_name.get(), last_name.get(), grad_year.get()),
             bg="#00796B",
             fg="white", font=("Roboto", 28, "bold"),
             relief="flat", bd=0)
@@ -985,6 +985,15 @@ class GUI:
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def edit_student_info(self, fname, lname, grad_year):
+        if fname == "":
+            fname = None
+        if lname == "":
+            lname = None
+        try:
+            grad_year = int(grad_year)
+        except ValueError:
+            grad_year = None
+
         self.current_user.access.admin_update_student_data(self.current_student_id, fname, lname, grad_year)
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
