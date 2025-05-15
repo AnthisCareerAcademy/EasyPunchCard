@@ -235,16 +235,21 @@ class SqlAccess:
         requests.delete(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
 
-    def admin_update_student_data(self, student_id:str, first_name:str, last_name:str, graduation_year: int):
+    def admin_update_student_data(self, student_id:str, first_name:str=None, last_name:str=None, graduation_year:int=None):
         """
         allows admin to update specific user data
+
         Args:
-            pass
+            student_id: needed argument
+            everything else: not needed (unless want to change)
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
         """
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
-        data = {"first_name": first_name, "last_name": last_name, "admin_status": None, "graduation_year": graduation_year}
-        requests.put(self.link + self.userEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
+        data = {"student_id": student_id, "first_name": first_name, "last_name": last_name, "graduation_year": graduation_year}
+        requests.put(self.link + self.userEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
 
     def database_to_excel(self, file_name:str="EasyPunchCard"):
