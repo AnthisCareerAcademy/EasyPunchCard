@@ -958,7 +958,7 @@ class GUI:
         submit_button = tk.Button(
             self.edit_student_info_frame,
             text="Submit",
-            command=lambda: self.edit_student_info(first_name.get(), last_name.get(), grad_year.get()),
+            command=lambda: self.edit_student_info(first_name.get(), last_name.get(), int(grad_year.get())),
             bg="#00796B",
             fg="white", font=("Roboto", 28, "bold"),
             relief="flat", bd=0)
