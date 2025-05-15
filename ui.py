@@ -820,7 +820,7 @@ class GUI:
         clock_in_hour.grid(row=3, column=2)
         colon = ttk.Label(clock_in_frame, text=":", font=("Roboto", 20))
         colon.grid(row=3, column=3)
-        clock_in_minute = ttk.Spinbox(clock_in_frame, from_=1, to=59, width=5, wrap=True, font=("Roboto", 14))
+        clock_in_minute = ttk.Spinbox(clock_in_frame, from_=0, to=59, width=5, wrap=True, font=("Roboto", 14))
         clock_in_minute.grid(row=3, column=4, padx=5)
         clock_in_dropdown = ttk.Combobox(
             clock_in_frame,
@@ -843,7 +843,7 @@ class GUI:
         clock_out_hour.grid(row=3, column=2)
         colon = ttk.Label(clock_out_frame, text=":", font=("Roboto", 20))
         colon.grid(row=3, column=3)
-        clock_out_minute = ttk.Spinbox(clock_out_frame, from_=1, to=59, width=5, wrap=True, font=("Roboto", 14))
+        clock_out_minute = ttk.Spinbox(clock_out_frame, from_=0, to=59, width=5, wrap=True, font=("Roboto", 14))
         clock_out_minute.grid(row=3, column=4, padx=5)
         clock_out_dropdown = ttk.Combobox(
             clock_out_frame,
@@ -1132,6 +1132,16 @@ class GUI:
         )
         individual_reports_button.pack(pady=25)
 
+        create_xl_button = tk.Button(
+            self.reports_selection_frame,
+            text="Create an xls sheet",
+            command=lambda: self.create_xl(),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        create_xl_button.pack(pady=25)
+
         # Back button
         back_button = tk.Button(
             self.reports_selection_frame,
@@ -1142,6 +1152,12 @@ class GUI:
             relief="flat", bd=0
         )
         back_button.pack()
+
+    def create_xl(self):
+        """creates class report in a folder called Reports"""
+        self.current_user.access.database_to_excel()
+        messagebox.showinfo("Info", "Excel spreadsheet has been created. It is located in Documents/Reports and the file is named EasyPunchCard")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def create_class_reports_screen(self):
         # file name text input
