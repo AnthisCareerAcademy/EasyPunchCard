@@ -218,7 +218,7 @@ class SqlAccess:
             raise ValueError("Error: user doesn't have admin status")
         
         data={"student_id": student_id, "start_time": start_time, "end_time": end_time}
-        requests.post(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+        requests.post(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
 
 
     def admin_delete_historical_data(self, student_id:str, start_time:str):
@@ -232,7 +232,7 @@ class SqlAccess:
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         data={"student_id": student_id, "start_time": start_time}
-        requests.delete(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+        requests.delete(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
 
 
     def admin_update_student_data(self, student_id:str, first_name:str=None, last_name:str=None, graduation_year:int=None):
