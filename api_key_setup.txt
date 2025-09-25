@@ -1,0 +1,13 @@
+SETTING UP THE API KEY THROUGH ENVIRONMENT VARIABLE
+
+1. Install python-dotenv through the terminal if not already installed through requirements.py
+	- pip install python-dotenv
+
+2. Create a .env file in the main directory (EasyPunchCard)
+	- CREATE .env
+
+3. In the .env file, create the environment variable:
+	- X_API=<api_key>
+
+!!! NO FURTHER CONFIGURATION IS NEEDED AS THE ENVIRONMENT VARIABLE WILL BE LOADED TO PYTHON AFTER THE
+    PREVIOUS STEPS ARE COMPLETED

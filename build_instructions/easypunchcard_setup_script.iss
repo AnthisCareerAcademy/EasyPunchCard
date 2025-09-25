@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "EasyPunchCard"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "FWCS Career Academy"
 #define MyAppURL "https://careeracademy.fortwayneschools.org/"
 #define MyAppExeName "EasyPunchCard.exe"
@@ -47,6 +47,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "..\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\.env"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

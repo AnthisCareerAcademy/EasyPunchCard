@@ -1,12 +1,13 @@
 import tkinter as tk
 
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Label
 
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
 
-
 from User import User
+from time import sleep
+
 
 class GUI:
     def __init__(self):
@@ -34,22 +35,34 @@ class GUI:
         self.log_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.clock_in_frame: ttk.Frame = ttk.Frame(self.root)
         self.admin_frame: ttk.Frame = ttk.Frame(self.root)
-        self.reports_frame: ttk.Frame = ttk.Frame(self.root)
-        self.employee_management_frame: ttk.Frame = ttk.Frame(self.root)
+        self.reports_selection_frame = ttk.Frame(self.root)
+        self.class_reports_frame: ttk.Frame = ttk.Frame(self.root)
+        self.individual_reports_frame: ttk.Frame = ttk.Frame(self.root)
+        self.student_management_frame: ttk.Frame = ttk.Frame(self.root)
+        self.update_frame: ttk.Frame = ttk.Frame(self.root)
+        self.add_clock_frame = ttk.Frame(self.root)
+        self.delete_clock_frame = ttk.Frame(self.root)
+        self.edit_student_info_frame = ttk.Frame(self.root)
 
         # Admin Windows
-        self.select_employee_frame: None | ttk.Frame = None
-        self.edit_employee_frame: None | ttk.Frame = None
-        self.add_employee_frame: None | ttk.Frame = ttk.Frame(self.root)
+        self.select_student_frame: None | ttk.Frame = None
+        self.edit_student_frame: None | ttk.Frame = None
+        self.add_student_frame: None | ttk.Frame = ttk.Frame(self.root)
 
         # A list of the current frames
         self.frames: list[str: ttk.Frame] = {
             "log_in_frame": self.log_in_frame,
             "clock_in_frame": self.clock_in_frame,
             "admin_frame": self.admin_frame,
-            "reports_frame": self.reports_frame,
-            "employee_management_frame": self.employee_management_frame,
-            "add_employee_frame": self.add_employee_frame,
+            'reports_selection_frame': self.reports_selection_frame,
+            "class_reports_frame": self.class_reports_frame,
+            "individual_reports_frame": self.individual_reports_frame,
+            "student_management_frame": self.student_management_frame,
+            "add_student_frame": self.add_student_frame,
+            "update_frame": self.update_frame,
+            "add_clock_frame": self.add_clock_frame,
+            "delete_clock_frame": self.delete_clock_frame,
+            "edit_student_info_frame": self.edit_student_info_frame,
         }
 
         # Start The Program with the log in screen
@@ -59,7 +72,7 @@ class GUI:
         self.log_in_frame.pack(expand=True, fill="both", padx=10, pady=10)
 
     # Frame creating methods ---------------------------------------------------
-    @ staticmethod
+    @staticmethod
     def create_floating_entry(
             parent: ttk.Frame,
             placeholder: str,
@@ -76,7 +89,7 @@ class GUI:
 
         # Creates and configures the entry frame -------
         entry_frame: ttk.Frame = ttk.Frame(parent)
-        entry_frame.pack(anchor="center", pady=(10,15))
+        entry_frame.pack(anchor="center", pady=(10, 15))
         # ----------------------------------------------
 
         # Creates and configures placeholder label -----------------------------------------
@@ -156,7 +169,9 @@ class GUI:
         """
 
         # Title ------------------------------------------
-        username = self.current_user.access.get_data_all_users("username").title()
+        fname = self.current_user.access.get_data_all_users("first_name").title()
+        lname = self.current_user.access.get_data_all_users("last_name").title()
+        username = fname + " " + lname
         title_label: ttk.Label = ttk.Label(
             self.clock_in_frame,
             text=f"{username} is logged in",
@@ -223,7 +238,9 @@ class GUI:
                 """
 
         # Title ------------------------------------------
-        username = self.current_user.access.get_data_all_users("username").title()
+        fname = self.current_user.access.get_data_all_users("first_name").title()
+        lname = self.current_user.access.get_data_all_users("last_name").title()
+        username = fname + " " + lname
         title_label: ttk.Label = ttk.Label(
             self.clock_in_frame,
             text=f"{username.title()} is logged in",
@@ -268,6 +285,17 @@ class GUI:
 
         log_out_button.pack(anchor="center", pady=10)
         # ----------------------------------------------------------
+        # Gets the user hours and writes them in a label --------------------------------------------
+        total_minutes: int = self.current_user.access.get_data_all_users("total_minutes")
+        hours: int = total_minutes // 60
+        minutes: float = total_minutes % 60
+        hours_label: ttk.Label = ttk.Label(
+            self.clock_in_frame,
+            text=f"Total Time: {hours}h{minutes}m",
+            font=("Roboto", 80, "bold"),
+            foreground="#000000"
+        )
+        hours_label.pack(expand=True)
 
     def create_admin_panel_screen(self):
         """
@@ -287,30 +315,37 @@ class GUI:
         title_label.pack()
         # ----------------------------------------------
 
-        # Set the columns and initializing the employees table ---------------------------------------------
+        # Set the columns and initializing the student table ---------------------------------------------
         columns: tuple[str, str, str, str, str, str, str] = (
-            "Student ID", "Username", "Admin Status", "Start Time", "Working", "Total Minutes", "Graduation Year")
+        "Student ID", "First Name", "Last Name", "Start Time", "Working", "Total Minutes", "Graduation Year")
 
-        employees_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
+        students_table: ttk.Treeview = ttk.Treeview(self.admin_frame, columns=columns, show="headings")
 
         for column in columns:
-            employees_table.heading(column, text=column)
-        employees_table.pack()
+            students_table.heading(column, text=column)
+        students_table.pack()
         # --------------------------------------------------------------------------------------------------
 
-        # Insert Employees below -----------------------------------------------------------------------
-        all_employees = self.current_user.access.admin_read_all_users()
-        for employee in all_employees:
-            employees_table.insert("", "end", values=employee)
+        # Insert students below -----------------------------------------------------------------------
+        all_students = self.current_user.access.admin_read_all_users()
+
+        # Group by grad year and then sorted by last name
+        sorted_all_students = sort_list(all_students)
+
+        for student in sorted_all_students:
+            #student["total_minutes"] = sum(entry['total_minutes'] for entry in self.current_user.access(student["student_id"]))
+            del student["end_time"]
+            del student["admin_status"]
+            students_table.insert("", "end", values=list(student.values()))
         # ----------------------------------------------------------------------------------------------
 
         # Configure and pack the edit button ------------
-        manage_employee_button: tk.Button = tk.Button(
+        manage_student_button: tk.Button = tk.Button(
             self.admin_frame,
-            text="Employee Management",
-            command=lambda: self.show(self.employee_management_frame,
-                                      "employee_management_frame",
-                                      self.create_employee_management_screen),
+            text="Student Management",
+            command=lambda: self.show(self.student_management_frame,
+                                      "student_management_frame",
+                                      self.create_student_management_screen),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -319,14 +354,15 @@ class GUI:
             cursor="hand2"
         )
 
-        manage_employee_button.pack(anchor="center", pady=10)
+        manage_student_button.pack(anchor="center", pady=10)
         # ------------------------------------------------
 
         # Configure and pack the reports button ------------
         report_button: tk.Button = tk.Button(
             self.admin_frame,
             text="Reports",
-            command=self.open_reports_window,
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame",
+                                      self.create_reports_selection_screen),
             bg="#00796B",
             fg="white",
             font=("Roboto", 36, "bold"),
@@ -348,30 +384,30 @@ class GUI:
             font=("Roboto", 30, "bold"),
             relief="flat",
             bd=0,
-            cursor="hand2",)
+            cursor="hand2", )
 
         log_out_button.pack(anchor="center", pady=10)
         # ----------------------------------------------------------
 
-    def create_add_employee_screen(self):
+    def create_add_student_screen(self):
         """
         Creates and configures the elements needed
-        to add employees (students) to the database
+        to add students (students) to the database
         """
 
         # Configuring the rows of the parent window
-        self.add_employee_frame.rowconfigure(0, weight=6)  # Top space
-        self.add_employee_frame.rowconfigure(1, weight=6)  # Center Space
-        self.add_employee_frame.rowconfigure(2, weight=2)  # Footer space
+        self.add_student_frame.rowconfigure(0, weight=6)  # Top space
+        self.add_student_frame.rowconfigure(1, weight=6)  # Center Space
+        self.add_student_frame.rowconfigure(2, weight=2)  # Footer space
 
         # Configuring the columns of the parent window
-        self.add_employee_frame.columnconfigure(0, weight=1)  # Left space
-        self.add_employee_frame.columnconfigure(1, weight=2)  # Center space
-        self.add_employee_frame.columnconfigure(2, weight=1)  # Right space
+        self.add_student_frame.columnconfigure(0, weight=1)  # Left space
+        self.add_student_frame.columnconfigure(1, weight=2)  # Center space
+        self.add_student_frame.columnconfigure(2, weight=1)  # Right space
 
         # Frame that will be on the higher side of the screen
         top_frame: ttk.Frame = ttk.Frame(
-            self.add_employee_frame,
+            self.add_student_frame,
             # borderwidth=5,
             # relief="solid"
 
@@ -383,6 +419,7 @@ class GUI:
         top_frame.columnconfigure(0, weight=3)
         top_frame.columnconfigure(1, weight=3)
         top_frame.columnconfigure(2, weight=3)
+        top_frame.columnconfigure(3, weight=3)
 
         # Configuring the rows of the top child window
         top_frame.rowconfigure(0, weight=2)
@@ -393,12 +430,12 @@ class GUI:
         # title label
         title_label: ttk.Label = ttk.Label(
             top_frame,
-            text="New Employee",
+            text="New Student",
             font=("Roboto", 50, "bold"),
             foreground="#00796B"
         )
 
-        title_label.grid(row=0, column=0, columnspan=3)
+        title_label.grid(row=0, column=0, columnspan=4)
 
         # TextBoxes
         pin_entry = ttk.Entry(
@@ -407,7 +444,7 @@ class GUI:
         )
 
         # Textbox in which the student's PIN will be hosted
-        pin_entry.insert(0, "PIN - (4 digits)")  # Prepopulate with "PIN"
+        pin_entry.insert(0, "Student ID")  # Prepopulate with "PIN"
         pin_entry.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
         pin_entry.bind("<FocusIn>", lambda clicked: pin_entry.delete(0, tk.END))
 
@@ -417,27 +454,36 @@ class GUI:
             font=("Roboto", 20),
         )
 
-        grad_entry.insert(0, "Grad Year - YYYY")  # Prepopulate with "PIN"
-        grad_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
+        grad_entry.insert(0, "Grad Year")  # Prepopulate with "PIN"
+        grad_entry.grid(row=1, column=3, sticky="nsew", pady=5, padx=5)
         grad_entry.bind("<FocusIn>", lambda clicked: grad_entry.delete(0, tk.END))
 
         # Textbox in which the student's username will be hosted
-        username_entry = ttk.Entry(
+        fname_entry = ttk.Entry(
             top_frame,
             font=("Roboto", 20)
         )
-        username_entry.insert(0, "USERNAME")  # Prepopulate with "Username"
-        username_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
-        username_entry.bind("<FocusIn>", lambda clicked: username_entry.delete(0, tk.END))
+        fname_entry.insert(0, "First Name")  # Prepopulate with "first name"
+        fname_entry.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
+        fname_entry.bind("<FocusIn>", lambda clicked: fname_entry.delete(0, tk.END))
+
+        # last name
+        lname_entry = ttk.Entry(
+            top_frame,
+            font=("Roboto", 20)
+        )
+        lname_entry.insert(0, "Last Name")  # Prepopulate with "last name"
+        lname_entry.grid(row=1, column=2, sticky="nsew", pady=5, padx=5)
+        lname_entry.bind("<FocusIn>", lambda clicked: lname_entry.delete(0, tk.END))
 
         # Creates the
         buttons_frame: ttk.Frame = ttk.Frame(top_frame)
-        buttons_frame.grid(row=2, column=0, columnspan=3, sticky="nsew")
+        buttons_frame.grid(row=2, column=0, columnspan=3, sticky="nsew", pady=10)
         buttons_frame.grid_propagate(False)
 
         # Configures the frame's columns
         buttons_frame.columnconfigure(0, weight=1)
-        buttons_frame.columnconfigure(1, weight=5)
+        buttons_frame.columnconfigure(1, weight=1)
         buttons_frame.columnconfigure(2, weight=1)
 
         # Configures the frame's row
@@ -455,10 +501,11 @@ class GUI:
             relief="flat",
             bd=0,
             cursor="hand2",
-            command=lambda: self.add_employee_request(pin_entry.get(), username_entry.get(), grad_entry.get())
+            command=lambda: self.add_student_request(pin_entry.get(), fname_entry.get(), lname_entry.get(),
+                                                     grad_entry.get())
         )
 
-        add_button.grid(row=1, column=1, sticky="ew")
+        add_button.grid(row=1, column=1, sticky="ew", columnspan=3, pady=5)
 
         reset_button: tk.Button = tk.Button(
             buttons_frame,
@@ -469,14 +516,14 @@ class GUI:
             relief="flat",
             bd=0,
             cursor="hand2",
-            command=lambda: self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+            command=lambda: self.show(self.add_student_frame, "add_student_frame", self.create_add_student_screen)
         )
 
-        reset_button.grid(row=2, column=1, sticky="ew")
+        reset_button.grid(row=2, column=1, sticky="ew", columnspan=3)
 
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
-            self.add_employee_frame,
+            self.add_student_frame,
             # borderwidth=5,
             # relief="solid"
         )
@@ -496,7 +543,8 @@ class GUI:
             back_button_frame,
             text="Back",
             bg="#8B0000",
-            command=lambda: self.show(self.employee_management_frame, "employee_management_frame", self.create_employee_management_screen),
+            command=lambda: self.show(self.student_management_frame, "student_management_frame",
+                                      self.create_student_management_screen),
             fg="white",
             font=("Roboto", 24, "bold"),
             relief="flat",
@@ -505,25 +553,25 @@ class GUI:
 
         back_button.grid(row=1, column=0, sticky="nsew")
 
-    def create_employee_management_screen(self):
+    def create_student_management_screen(self):
         """
         Creates and configures the elements needed for the window
         :return None
         """
 
         # Configuring the rows of the parent window
-        self.employee_management_frame.rowconfigure(0, weight=6)  # Top space
-        self.employee_management_frame.rowconfigure(1, weight=6)  # Center Space
-        self.employee_management_frame.rowconfigure(2, weight=2)  # Footer space
+        self.student_management_frame.rowconfigure(0, weight=6)  # Top space
+        self.student_management_frame.rowconfigure(1, weight=6)  # Center Space
+        self.student_management_frame.rowconfigure(2, weight=2)  # Footer space
 
         # Configuring the columns of the parent window
-        self.employee_management_frame.columnconfigure(0, weight=1)  # Left space
-        self.employee_management_frame.columnconfigure(1, weight=2)  # Center space
-        self.employee_management_frame.columnconfigure(2, weight=1)  # Right space
+        self.student_management_frame.columnconfigure(0, weight=1)  # Left space
+        self.student_management_frame.columnconfigure(1, weight=2)  # Center space
+        self.student_management_frame.columnconfigure(2, weight=1)  # Right space
 
         # Frame that will be on the higher side of the screen
         top_frame: ttk.Frame = ttk.Frame(
-            self.employee_management_frame,
+            self.student_management_frame,
             # borderwidth=5,
             # relief="solid"
 
@@ -552,68 +600,70 @@ class GUI:
         # title label
         title_label: ttk.Label = ttk.Label(
             top_frame,
-            text="Employee Management",
+            text="Student Management",
             font=("Roboto", 50, "bold"),
             foreground="#00796B"
         )
 
         title_label.grid(row=0, column=0, columnspan=6)
 
-        employees = {}
-        for employee in self.current_user.access.admin_read_all_users():
+        students = {}
+        for student in self.current_user.access.admin_read_all_users():
             # Skips the admin user
-            if employee[1] == "admin_user":
+            if student["admin_status"] == 1:
                 continue
-            employees.update({employee[1]: employee[0]})
+            username = student["first_name"] + " " + student["last_name"]
+            students.update({username: student['student_id']})
 
-        # Dropdown of the available employees
-        select_employee_dropdown: ttk.Combobox = ttk.Combobox(
+        # Dropdown of the available students
+        select_student_dropdown: ttk.Combobox = ttk.Combobox(
             top_frame,
-            values=list(employees.keys()),
+            values=list(sorted(students.keys())),
             font=("Roboto", 25, "bold")
         )
 
-        select_employee_dropdown.grid(
-            row=2, column=0,
+        select_student_dropdown.grid(
+            row=5, column=0,
             sticky="new",
             columnspan=6
         )
 
-        # Button used to select an employee
+        # Button used to select an student
         select_button: tk.Button = tk.Button(
             top_frame,
             text="Select",
             bg="#00796B",
+            command=lambda: self.go_to_update_screen(students[select_student_dropdown.get()]),
             fg="white",
             font=("Roboto", 30, "bold"),
             relief="flat",
             bd=0,
             cursor="hand2"
         )
-        select_button.grid(row=3, column=1, columnspan=4, sticky="ew")
+        select_button.grid(row=6, column=1, columnspan=4, sticky="ew")
 
-        # Button used to delete an employee from the database
-        delete_employee_button: tk.Button = tk.Button(
+        # Button used to delete an student from the database
+        delete_student_button: tk.Button = tk.Button(
             top_frame,
-            text="Delete Employee",
+            text="Delete student",
             bg="#8B0000",
             fg="white",
             font=("Roboto", 30, "bold"),
             relief="flat",
-            command=lambda: self.delete_employee_request(select_employee_dropdown.get(), employees),
+            command=lambda: self.delete_student_request(select_student_dropdown.get(), students),
             bd=0,
             cursor="hand2"
         )
-        delete_employee_button.grid(row=4, column=1, columnspan=4, sticky="ew")
+        delete_student_button.grid(row=7, column=1, columnspan=4, sticky="ew")
 
         # Frame that will be on the lower side of the screen
         bottom_frame: ttk.Frame = ttk.Frame(
-            self.employee_management_frame,
+            self.student_management_frame,
             # borderwidth=5,
             # relief="solid"
         )
 
-        bottom_frame.grid(row=1, column=1, sticky="nsew")
+        bottom_frame.grid(row=5, column=1, sticky="nsew")
         bottom_frame.grid_propagate(False)
 
         # Configures the rows of the bottom child frame
@@ -626,22 +676,9 @@ class GUI:
         bottom_frame.columnconfigure(1, weight=2)
         bottom_frame.columnconfigure(2, weight=2)
 
-        # Creates the calendar that will be used to edit the student's hours
-        calendar = Calendar(
-            bottom_frame,
-            selectmode='day',
-            year=datetime.today().year,
-            month=datetime.today().month,
-            day=datetime.today().day,
-            font=("Roboto", 12),
-            foreground = "white",
-            background="#00796B"
-        )
-        calendar.grid(row=0, column=0, sticky="nsew")
-
         # Frame that will host the back button
         back_button_frame: ttk.Frame = ttk.Frame(
-            self.employee_management_frame,
+            self.student_management_frame,
             # borderwidth=5,
             # relief="solid"
         )
@@ -670,37 +707,296 @@ class GUI:
 
         back_button.grid(row=1, column=0, sticky="nsew")
 
-        # Frame that will host the Add Employee button
-        add_employee_button_frame: ttk.Frame = ttk.Frame(
-            self.employee_management_frame,
+        # Frame that will host the Add student button
+        add_student_button_frame: ttk.Frame = ttk.Frame(
+            self.student_management_frame,
             # borderwidth=5,
             # relief="solid"
         )
-        add_employee_button_frame.grid(row=2, column=2, sticky="nsew")
-        add_employee_button_frame.grid_propagate(False)
+        add_student_button_frame.grid(row=2, column=2, sticky="nsew")
+        add_student_button_frame.grid_propagate(False)
 
-        # configures the rows of the add_employee_button_frame
-        add_employee_button_frame.rowconfigure(0, weight=1)
-        add_employee_button_frame.rowconfigure(1, weight=1)
+        # configures the rows of the add_student_button_frame
+        add_student_button_frame.rowconfigure(0, weight=1)
+        add_student_button_frame.rowconfigure(1, weight=1)
 
-        # configures the columns of the add_employee_button_frame
-        add_employee_button_frame.columnconfigure(0, weight=1)
-        add_employee_button_frame.columnconfigure(1, weight=1)
+        # configures the columns of the add_student_button_frame
+        add_student_button_frame.columnconfigure(0, weight=1)
+        add_student_button_frame.columnconfigure(1, weight=1)
 
-        # Button that takes the add employee window
-        add_employee_button: tk.Button = tk.Button(
-            add_employee_button_frame,
-            text="Add Employee",
+        # Button that takes the add student window
+        add_student_button: tk.Button = tk.Button(
+            add_student_button_frame,
+            text="Add student",
             bg="#06402B",
             # command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
             fg="white",
             font=("Roboto", 24, "bold"),
             relief="flat",
             cursor="hand2",
-            command=lambda: self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+            command=lambda: self.show(self.add_student_frame, "add_student_frame", self.create_add_student_screen)
         )
 
-        add_employee_button.grid(row=1, column=1, sticky="nsew")
+        add_student_button.grid(row=1, column=1, sticky="nsew")
+
+    def go_to_update_screen(self, student_id):
+        self.current_student_id = student_id
+        self.show(self.update_frame, "update_frame", self.create_update_screen)
+
+    def create_update_screen(self):
+        page_title = ttk.Label(
+            self.update_frame, text="Edit Menu", font=("Roboto", 36, 'underline')
+        )
+        page_title.pack(pady=20)
+
+        add_clock_button = tk.Button(
+            self.update_frame,
+            text="Add clock time",
+            command=lambda: self.show(self.add_clock_frame, "add_clock_frame",
+                                      self.create_add_clock_frame),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        add_clock_button.pack(pady=10)
+
+        delete_time_button = tk.Button(
+            self.update_frame,
+            text="Delete clock time",
+            command=lambda: self.show(self.delete_clock_frame, "delete_clock_frame",
+                                      self.create_delete_clock_frame),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        delete_time_button.pack(pady=10)
+
+        edit_student_info = tk.Button(
+            self.update_frame,
+            text="Edit Student Info",
+            command=lambda: self.show(self.edit_student_info_frame, "edit_student_info_frame",
+                                      self.create_edit_student_info_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        edit_student_info.pack(pady=10)
+
+        # Back button
+        back_button = tk.Button(
+            self.update_frame,
+            text="Back",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 35, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack(pady=25)
+
+    def create_add_clock_frame(self):
+        self.add_clock_frame.columnconfigure(0, weight=1)
+        self.add_clock_frame.columnconfigure(1, weight=1)
+        self.add_clock_frame.columnconfigure(2, weight=1)
+
+        page_title = ttk.Label(
+            self.add_clock_frame, text="Add Clock Entry", font=("Roboto", 36, 'underline')
+        )
+        page_title.grid(row=0, column=1, pady=20)
+        cal = Calendar(self.add_clock_frame, selectmode='day', year=datetime.today().year,
+                       month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
+        cal.grid(row=1, column=1, pady=30)
+
+        dropdown_options = ['AM', 'PM']
+        # Clock in stuff
+        clock_in_title = ttk.Label(
+            self.add_clock_frame, text="Clock in time", font=("Roboto", 20, 'underline')
+        )
+        clock_in_title.grid(row=2, column=1)
+        clock_in_frame = ttk.Frame(self.add_clock_frame)
+        clock_in_frame.grid(row=3, column=1, pady=10)
+        for i in range(5):
+            clock_in_frame.grid_columnconfigure(i, weight=1)
+        clock_in_hour = ttk.Spinbox(clock_in_frame, from_=1, to=12, width=5, wrap=True, font=("Roboto", 14))
+        clock_in_hour.grid(row=3, column=2)
+        colon = ttk.Label(clock_in_frame, text=":", font=("Roboto", 20))
+        colon.grid(row=3, column=3)
+        clock_in_minute = ttk.Spinbox(clock_in_frame, from_=0, to=59, width=5, wrap=True, font=("Roboto", 14))
+        clock_in_minute.grid(row=3, column=4, padx=5)
+        clock_in_dropdown = ttk.Combobox(
+            clock_in_frame,
+            values=dropdown_options,
+            font=("Roboto", 14),
+            width=3
+        )
+        clock_in_dropdown.grid(row=3, column=5)
+
+        # Clock out stuff
+        clock_out_title = ttk.Label(
+            self.add_clock_frame, text="Clock out time", font=("Roboto", 20, 'underline')
+        )
+        clock_out_title.grid(row=4, column=1)
+        clock_out_frame = ttk.Frame(self.add_clock_frame)
+        clock_out_frame.grid(row=5, column=1, pady=10)
+        for i in range(5):
+            clock_out_frame.grid_columnconfigure(i, weight=1)
+        clock_out_hour = ttk.Spinbox(clock_out_frame, from_=1, to=12, width=5, wrap=True, font=("Roboto", 14))
+        clock_out_hour.grid(row=3, column=2)
+        colon = ttk.Label(clock_out_frame, text=":", font=("Roboto", 20))
+        colon.grid(row=3, column=3)
+        clock_out_minute = ttk.Spinbox(clock_out_frame, from_=0, to=59, width=5, wrap=True, font=("Roboto", 14))
+        clock_out_minute.grid(row=3, column=4, padx=5)
+        clock_out_dropdown = ttk.Combobox(
+            clock_out_frame,
+            values=dropdown_options,
+            font=("Roboto", 14),
+            width=3
+        )
+        clock_out_dropdown.grid(row=3, column=5)
+
+        submit_button = tk.Button(
+            self.add_clock_frame,
+            text="Submit Time",
+            command=lambda: self.submitting_clock_time(
+                cal.get_date(), f"{clock_in_hour.get() + 12 if clock_in_dropdown.get().upper() == "PM" else 0}:{clock_in_minute.get()}",
+                f"{clock_out_hour.get()  + 12 if clock_out_dropdown.get().upper() == "PM" else 0}:{clock_out_minute.get()}"),
+            bg="#32CD32",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        submit_button.grid(row=6, column=1, pady=20)
+
+        back_button = tk.Button(
+            self.add_clock_frame,
+            text="Back",
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 16, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.grid(row=7, column=1)
+
+    def create_delete_clock_frame(self):
+        self.delete_clock_frame.columnconfigure(0, weight=1)
+        self.delete_clock_frame.columnconfigure(1, weight=1)
+        self.delete_clock_frame.columnconfigure(2, weight=1)
+
+        page_title = ttk.Label(
+            self.delete_clock_frame, text="Delete Clock Entry", font=("Roboto", 36, 'underline')
+        )
+        page_title.grid(row=0, column=1, pady=20)
+        dates = [entry['start_time'] for entry in self.current_user.access.admin_read_user_history(self.current_student_id) if entry['start_time'] !='']
+        dropdown = ttk.Combobox(
+            self.delete_clock_frame,
+            values=dates,
+            font=("Roboto", 25, "bold")
+        )
+        dropdown.set("Select a time")
+        dropdown.grid(row=1, column=1, pady=10)
+
+        submit_button = tk.Button(
+            self.delete_clock_frame,
+            text="Delete Time",
+            command=lambda: self.deleting_clock_time(dropdown.get()),
+            bg="#32CD32",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        submit_button.grid(row=6, column=1, pady=20)
+
+        back_button = tk.Button(
+            self.delete_clock_frame,
+            text="Back",
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 16, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.grid(row=7, column=1)
+
+    def create_edit_student_info_screen(self):
+        self.edit_student_info_frame.columnconfigure(0, weight=1)
+        self.edit_student_info_frame.columnconfigure(1, weight=1)
+        title = ttk.Label(
+            self.edit_student_info_frame, text="Update Student Info", font=("Roboto", 36, 'underline')
+        )
+        title.grid(row=0, column=0, columnspan=2, pady=20)
+
+        grad_year = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        grad_year.grid(row=1, column=0)
+        grad_year_title = ttk.Label(
+            self.edit_student_info_frame, text="Graduation Year", font=("Roboto", 20)
+        )
+        grad_year_title.grid(row=1, column=1, pady=15)
+
+        first_name = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        first_name.grid(row=2, column=0)
+        first_name_title = ttk.Label(
+            self.edit_student_info_frame, text="First Name", font=("Roboto", 20)
+        )
+        first_name_title.grid(row=2, column=1, pady=15)
+
+        last_name = ttk.Entry(
+            self.edit_student_info_frame,
+            font=("Roboto", 20)
+        )
+        last_name.grid(row=3, column=0)
+        last_name_title = ttk.Label(
+            self.edit_student_info_frame, text="Last Name", font=("Roboto", 20)
+        )
+        last_name_title.grid(row=3, column=1, pady=20)
+
+        message_text = ttk.Label(
+            self.edit_student_info_frame, text="(Leave anything blank if no change)", font=("Roboto", 14)
+        )
+        message_text.grid(row=4, column=0, columnspan=2, pady=10)
+
+        submit_button = tk.Button(
+            self.edit_student_info_frame,
+            text="Submit",
+            command=lambda: self.edit_student_info(first_name.get(), last_name.get(), grad_year.get()),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0)
+        submit_button.grid(row=5, column=0, columnspan=2)
+
+        back_button = tk.Button(
+            self.edit_student_info_frame,
+            text="Back",
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 16, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.grid(row=6, column=1)
+
+    def submitting_clock_time(self, date, clock_in, clock_out):
+        date_obj = datetime.strptime(date, "%m/%d/%y")
+        formated_date = date_obj.strftime("%B %d, %Y")
+        self.current_user.access.admin_update_historical_data(self.current_student_id, f"{formated_date} {clock_in}", f"{formated_date} {clock_out}")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
+    def deleting_clock_time(self, selected_time):
+        self.current_user.access.admin_delete_historical_data(self.current_student_id, selected_time)
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
+    def edit_student_info(self, fname, lname, grad_year):
+        if fname == "":
+            fname = None
+        if lname == "":
+            lname = None
+        try:
+            grad_year = int(grad_year)
+        except ValueError:
+            grad_year = None
+
+        self.current_user.access.admin_update_student_data(self.current_student_id, fname, lname, grad_year)
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
@@ -738,6 +1034,7 @@ class GUI:
 
         # Rebuilds the frame
         frame_builder()
+
     # ---------------------------------------------------------------------
 
     # Clock Methods ----------------------------------------
@@ -745,27 +1042,30 @@ class GUI:
         # messagebox.showinfo("Hours", "You currently have 32hrs")
         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
         self.current_user.clock.clock_in()
+        self.log_out()
 
     def clock_out(self):
         self.current_user.clock.clock_out()
         self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
-    # -----------------------------------------------------
+        self.log_out()
+        # -----------------------------------------------------
 
     # Admin methods --------------------------------------
-    def add_employee_request(self, pin: str, username: str, grad_year: str):
+    def add_student_request(self, pin: str, first_name: str, last_name: str, grad_year: str):
 
         # Creates a list to store the active PINs in the database
         active_pins: list[str] = []
         active_usernames: list[str] = []
+        username = first_name + " " + last_name
 
         # Goes through the list of users and extracts their PINs
         for user in self.current_user.access.admin_read_all_users():
-            active_pins.append(user[0])
-            active_usernames.append(user[1])
+            active_pins.append(user['student_id'])
+            active_usernames.append(user["first_name"] + " " + user["last_name"])
 
         # Checks for possible PIN errors from the user
-        if len(pin) != 4:
-            messagebox.showwarning("PIN Error", "Your PIN needs to be 4 digits")
+        if len(pin) < 7:
+            messagebox.showwarning("PIN Error", "Your Student ID needs to be at least 7 digits")
             return
         elif not pin.isdigit():
             messagebox.showwarning("PIN Error", "Your PIN cannot have letters only numbers are allowed")
@@ -775,11 +1075,11 @@ class GUI:
             return
 
         # Checks for possible username errors from the user
-        if not username:
-            messagebox.showwarning("USERNAME Error", "Your username cannot be empty")
+        if not first_name or not last_name:
+            messagebox.showwarning("USERNAME Error", "Your firstname or lastname cannot be empty")
             return
         elif username in active_usernames:
-            messagebox.showwarning("USERNAME Error", f"Another user exists with the same USERNAME: {username}")
+            messagebox.showwarning("USERNAME Error", f"Another user exists with the same NAME: {username}")
             return
 
         try:
@@ -791,161 +1091,244 @@ class GUI:
         if not grad_year_int:
             messagebox.showwarning("Graduation Year Error", "Your Graduation year cannot be empty")
         elif grad_year_int < datetime.today().year:
-            messagebox.showwarning("Graduation Year Error", f"Your Graduation year cannot be less than {datetime.today().year}")
+            messagebox.showwarning("Graduation Year Error",
+                                   f"Your Graduation year cannot be less than {datetime.today().year}")
             return
 
-        self.current_user.access.add_user(pin, username, 0, grad_year_int)
+        self.current_user.access.add_user(pin, first_name, last_name, 0, grad_year_int)
         messagebox.showinfo("User Addition", f"{username} Has been added to the database")
-        self.show(self.add_employee_frame, "add_employee_frame", self.create_add_employee_screen)
+        self.show(self.add_student_frame, "add_student_frame", self.create_add_student_screen)
 
-    def delete_employee_request(self, username: str, employees: dict[str, str]):
+    def delete_student_request(self, username: str, students: dict[str, str]):
 
-       try:
-           employee_pin = employees[username]
-           self.current_user.access.remove_user(employee_pin)
-           messagebox.showinfo("User Deletion", f"{username} has been deleted from the database")
-           self.show(self.employee_management_frame, "employee_management_frame", self.create_employee_management_screen)
-       except KeyError:
-           messagebox.showwarning("User Error", "Please select a valid user")
+        try:
+            student_pin = students[username]
+            if self.confirm_action(username):
+                self.current_user.access.remove_user(student_pin)
+                messagebox.showinfo("User Deletion", f"{username} has been deleted from the database")
+            else:
+                pass
+            self.show(self.student_management_frame, "student_management_frame", self.create_student_management_screen)
+        except KeyError:
+            messagebox.showwarning("User Error", "Please select a valid user")
 
-    def open_reports_window(self):
-        """
-        Opens a new window to view and print reports
-        :return None:
-        """
-        # Create the pop-up window for class reports------------------------------------
-        class_report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        class_report_window.title("Class Reports")
-        class_report_window.geometry("500x400")
+    def confirm_action(self, name):
+        return messagebox.askyesno("Confirmation", f"Are you sure you want to delete {name}? This action CAN NOT be undone.")
+    def create_reports_selection_screen(self):
+        page_title = ttk.Label(
+            self.reports_selection_frame, text="Reports", font=("Roboto", 36, 'underline')
+        )
+        page_title.pack(pady=20)
 
+        class_reports_button = tk.Button(
+            self.reports_selection_frame,
+            text="Make a class report",
+            command=lambda: self.show(self.class_reports_frame, "class_reports_frame",
+                                      self.create_class_reports_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        class_reports_button.pack(pady=10)
+
+        individual_reports_button = tk.Button(
+            self.reports_selection_frame,
+            text="Make an individual report",
+            command=lambda: self.show(self.individual_reports_frame, "individual_reports_frame",
+                                      self.create_individual_reports_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        individual_reports_button.pack(pady=25)
+
+        create_xl_button = tk.Button(
+            self.reports_selection_frame,
+            text="Create an xls sheet",
+            command=lambda: self.create_xl(),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        create_xl_button.pack(pady=25)
+
+        # Back button
+        back_button = tk.Button(
+            self.reports_selection_frame,
+            text="Back",
+            command=lambda: self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 35, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
+
+    def create_xl(self):
+        """creates class report in a folder called Reports"""
+        self.current_user.access.database_to_excel()
+        messagebox.showinfo("Info", "Excel spreadsheet has been created. It is located in Documents/Reports and the file is named EasyPunchCard")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
+    def create_class_reports_screen(self):
         # file name text input
-        class_file_name_label: ttk.Label = ttk.Label(class_report_window, text="File Name",font=("Roboto", 12))
+        class_file_name_label: ttk.Label = ttk.Label(self.class_reports_frame, text="File Name", font=("Roboto", 24))
         class_file_name_label.pack(pady=5)
-        class_file_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_file_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_file_name.pack(pady=5)
 
         # company name text input
-        class_company_name_label: ttk.Label = ttk.Label(class_report_window, text="Company Name",font=("Roboto", 12))
+        class_company_name_label: ttk.Label = ttk.Label(self.class_reports_frame, text="Class Name",
+                                                        font=("Roboto", 24))
         class_company_name_label.pack(pady=5)
-        class_company_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_company_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_company_name.pack(pady=5)
 
         # title text input
-        class_title_label: ttk.Label = ttk.Label(class_report_window, text="Title Name",font=("Roboto", 12))
+        class_title_label: ttk.Label = ttk.Label(self.class_reports_frame, text="Title Name", font=("Roboto", 24))
         class_title_label.pack(pady=5)
-        class_title_name: tk.Entry = tk.Entry(class_report_window, width=20)
+        class_title_name: tk.Entry = tk.Entry(self.class_reports_frame, width=20, font=20)
         class_title_name.pack(pady=5)
 
         # Print class report button
         print_class_button: tk.Button = tk.Button(
-            class_report_window,
+            self.class_reports_frame,
             text="Print All Users Report",
-            command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(), class_title_name.get()),
+            command=lambda: self.print_class_report(class_file_name.get(), class_company_name.get(),
+                                                    class_title_name.get()),
             bg="#00796B",
-            fg="white", font=("Roboto", 12, "bold"),
+            fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_class_button.pack(pady=20)
-        # --------------------------------------------------------------
 
+        # Back button
+        back_button = tk.Button(
+            self.class_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame",
+                                      self.create_reports_selection_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
+        # ---------------------------------------------------------------
 
-        # Create the pop-up window for small reports------------------------------------
-        report_window: tk.Toplevel = tk.Toplevel(self.admin_frame)
-        report_window.title("User Reports")
-        report_window.geometry("500x750")
-
+    def create_individual_reports_screen(self):
         # file name text input
-        file_name_label: ttk.Label = ttk.Label(report_window, text="File Name",font=("Roboto", 12))
+        file_name_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="File Name", font=("Roboto", 20))
         file_name_label.pack(pady=5)
 
-        file_name: tk.Entry = tk.Entry(report_window, width=20)
+        file_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         file_name.pack(pady=5)
 
         # company name text input
-        company_name_label: ttk.Label = ttk.Label(report_window, text="Company Name",font=("Roboto", 12))
+        company_name_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Class Name", font=("Roboto", 20))
         company_name_label.pack(pady=5)
-        company_name: tk.Entry = tk.Entry(report_window, width=20)
+        company_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         company_name.pack(pady=5)
 
         # title text input
-        title_label: ttk.Label = ttk.Label(report_window, text="Title Name",font=("Roboto", 12))
+        title_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Title Name", font=("Roboto", 20))
         title_label.pack(pady=5)
-        title_name: tk.Entry = tk.Entry(report_window, width=20)
+        title_name: tk.Entry = tk.Entry(self.individual_reports_frame, width=20, font=18)
         title_name.pack(pady=5)
 
         # student dropdown
-        employee_label: ttk.Label = ttk.Label(report_window, text="Select Employee", font=("Roboto", 12))
-        employee_label.pack(pady=10)
+        student_label: ttk.Label = ttk.Label(self.individual_reports_frame, text="Select student", font=("Roboto", 20))
+        student_label.pack(pady=5)
 
         all_users = self.current_user.access.admin_read_all_users()
         values = {}
         for user in all_users:
-            values[user[1]] = user[0]
+            fname = user["first_name"]
+            lname = user["last_name"]
+            username = fname + " " + lname
+            values[username] = user["student_id"]
 
-        employee_combobox: ttk.Combobox = ttk.Combobox(
-            report_window,
-            values=list(values))
-        
-        employee_combobox.pack(pady=5)
+        student_combobox: ttk.Combobox = ttk.Combobox(
+            self.individual_reports_frame,
+            values=list(sorted(values.keys())),
+            font=20)
+
+        student_combobox.pack(pady=20)
 
         # date range selection
-        self.cal = Calendar(report_window, selectmode='day', year=datetime.today().year, month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
-        self.cal.pack(pady=20)
+        self.cal = Calendar(self.individual_reports_frame, selectmode='day', year=datetime.today().year,
+                            month=datetime.today().month, day=datetime.today().day, font=("Roboto", 12))
+        self.cal.pack()
 
         self.start_date = None
         self.end_date = None
-        
-        self.feedback_label = ttk.Label(report_window, text="")
-        self.feedback_label.pack(pady=10)
+
+        self.feedback_label = ttk.Label(self.individual_reports_frame, text="")
+        self.feedback_label.pack()
 
         # start date button
         start_date_button: tk.Button = tk.Button(
-            report_window, 
-            text="Set Start Date", 
+            self.individual_reports_frame,
+            text="Set Start Date",
             command=self.set_start_date,
-            bg = "#00796B",
-            fg = "white",
-            font = ("Roboto", 12, "bold"),
-            relief = "flat",
-            bd = 0,
-            height = 1,
-            width = 15,
-            )
-        start_date_button.pack(pady=10)
-        
-        # end date button
-        end_date_button: tk.Button = tk.Button(
-            report_window, 
-            text="Set End Date", 
-            command=self.set_end_date,
             bg="#00796B",
             fg="white",
-            font=("Roboto", 12, "bold"),
+            font=("Roboto", 16, "bold"),
             relief="flat",
             bd=0,
             height=1,
             width=15,
-            )
-        end_date_button.pack(pady=10)
+        )
+        start_date_button.pack(pady=10)
+
+        # end date button
+        end_date_button: tk.Button = tk.Button(
+            self.individual_reports_frame,
+            text="Set End Date",
+            command=self.set_end_date,
+            bg="#00796B",
+            fg="white",
+            font=("Roboto", 16, "bold"),
+            relief="flat",
+            bd=0,
+            height=1,
+            width=15,
+        )
+        end_date_button.pack(pady=8)
 
         # print specific user report button
         print_specific_user_button: tk.Button = tk.Button(
-            report_window,
+            self.individual_reports_frame,
             text="Print Specific User Report",
-            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(), self.start_date.strftime('%m/%d/%Y'), self.end_date.strftime('%m/%d/%Y'), employee_combobox.get(), str(values[employee_combobox.get()])),
+            command=lambda: self.print_specific_user_report(file_name.get(), company_name.get(), title_name.get(),
+                                                            self.start_date.strftime('%m/%d/%Y'),
+                                                            self.end_date.strftime('%m/%d/%Y'), student_combobox.get(),
+                                                            str(values[student_combobox.get()])),
             bg="#00796B",
-            fg="white", font=("Roboto", 12, "bold"),
+            fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0)
         print_specific_user_button.pack(pady=20)
 
-        # --------------------------------------------------------------
+        back_button = tk.Button(
+            self.individual_reports_frame,
+            text="Back",
+            command=lambda: self.show(self.reports_selection_frame, "reports_selection_frame",
+                                      self.create_reports_selection_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 20, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.pack()
 
     def print_class_report(self, file_name, company_name, title):
         """creates class report in a folder called Reports"""
         self.current_user.report.create_class_pdf(file_name, company_name, title)
+        messagebox.showinfo("Info", "Class Report has been created. It is located in Documents/Reports.")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def print_specific_user_report(self, file_name, company_name, title, start_date, end_date, name, student_id):
         """creates a user report in the same Reports folder"""
-        self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name, student_id)
+        self.current_user.report.create_user_specific_pdf(file_name, company_name, title, start_date, end_date, name,
+                                                          student_id)
+        messagebox.showinfo("Info", "User Specific Report has been created. It is located in Documents/Reports.")
+        self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
 
     def set_start_date(self):
         self.start_date = datetime.strptime(self.cal.get_date(), "%m/%d/%y")
@@ -973,21 +1356,22 @@ class GUI:
                 current_date += timedelta(days=1)
             # Configure the highlight appearance
             self.cal.tag_config("highlight", background="lightblue", foreground="black")
-            self.feedback_label.config(text=f"Highlighted: {self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}")
+            self.feedback_label.config(
+                text=f"Highlighted: {self.start_date.strftime('%Y-%m-%d')} to {self.end_date.strftime('%Y-%m-%d')}")
         except ValueError as e:
             self.feedback_label.config(text=f"Error: {e}")
 
-    def employee_selected(self, emp_id: str, window=0, constructor=0):
+    def student_selected(self, emp_id: str, window=0, constructor=0):
         """
         Makes a call to the database, using a specific user credentials
-        :param emp_id: credential connected to the employee in the database (4-digits)
+        :param emp_id: credential connected to the student in the database (4-digits)
         :param window: parent window
         :param constructor: Method used to create the screen
         :return: None
         """
 
-        employee = self.current_user.access.admin_get_row_all_users(emp_id)
-        print(employee)
+        student = self.current_user.access.admin_get_row_all_users(emp_id)
+
     # ----------------------------------------------------
 
     # Backend functions
@@ -999,31 +1383,25 @@ class GUI:
 
         # Check if the username and PIN fields are fulfilled
         if self.pin.get():
+            try:
+                user = User(self.pin.get())
+            except ValueError:
+                messagebox.showwarning("User Error", "User does not exist")
+                self.pin.set("")
+                return
 
-            # Temporary access to admin panel
-            if self.pin.get() == "0000":
+            admin_status = user.access.admin_status
+            if admin_status == 1:
                 self.current_user = User(self.pin.get())
-                # self.current_user.access.add_user(1010, "luis", 0)
-                # self.current_user.access.add_user(2020, "jackson", 0)
-                # self.current_user.access.add_user(3030, "aung", 0)
-                # self.current_user.access.add_user(4040, "obeth", 0)
-                # self.current_user.access.add_user(5050, "martin", 0)
-                # self.current_user.access.add_user(6060, "logan", 0)
                 self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
-            else:
-
+            elif admin_status == 0:
                 # Checks if the credentials are in the database
-                try:
-                    self.current_user = User(self.pin.get())
-                    if self.current_user.access.get_data_all_users("working_status") == 1:
-                        self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
-                    else:
-                        self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
+                self.current_user = User(self.pin.get())
+                if self.current_user.access.get_data_all_users("working_status") == 1:
+                    self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_out_screen)
+                else:
+                    self.show(self.clock_in_frame, "clock_in_frame", self.create_clock_in_screen)
 
-                # Warns the user if the credentials are incorrect
-                except ValueError:
-                    messagebox.showwarning("User Error", "User does not exist")
-                    self.pin.set("")
         else:
             # Resets the log in screen
             self.pin.set("")
@@ -1043,6 +1421,25 @@ class GUI:
     # # Extra functions
     # def exit_fullscreen(self):
     #     self.root.attributes("-fullscreen", False)
+
+def sort_list(list):
+    """
+    Args:
+        list: list of dicts. This data would come from the return of the function admin_read_all_users
+    Return:
+        Returns a list grouped by graduation year and sorted by last name within those groupings
+    """
+    list_sorted_grad_year = sorted(list, key=lambda x: x['graduation_year'])
+    grad_years = {}
+    for student in list_sorted_grad_year:
+        year = student['graduation_year']
+        if year not in grad_years:
+            grad_years[year] = []
+        grad_years[year].append(student)
+    for year in grad_years:
+        grad_years[year] = sorted(grad_years[year], key=lambda x: x['last_name'])
+    flattened_list = [student for year in grad_years.values() for student in year]
+    return flattened_list
 
 
 gui = GUI()
