@@ -1,21 +1,30 @@
-## Take a look at the plan here
-Members
-* User Interface
-   * Logan
-   * Luis
-   * Martin
+# Cosmetology Punch Card Software
+
+This software allows members of the FWCS Career Academy cosmetology department to record clock time.
+System admin can add and delete user records, add and delete users, and print out reports.
+Students can clock in and out. This integrates with an FWCS API.
 
 
-* Backend/database
-   * Obeth
-   * Jackson
-   * Aung
+## Team Members
+### User Interface
+* Logan
+* Luis
+* Martin
 
-Purpose
-Create a punch card system for users to track how many hours they worked
+### Backend/database
+* Obeth
+* Jackson
+* Aung
+
+### Patching
+* Audrina
+* Henry
+* Julian
+* Josue
+* Seth
 
 
-Scope
+## Scope
 * Language - Python
 * Source control - Git/Github
 * GUI - Tkinter
