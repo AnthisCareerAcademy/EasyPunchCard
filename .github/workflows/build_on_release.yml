@@ -23,6 +23,7 @@ jobs:
 
     - name: Set API key in environment
       run: |
+        echo "Creating API key variable in GITHUB_ENV"
         echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
 
     - name: Set PowerShell Execution Policy to Bypass
@@ -36,7 +37,8 @@ jobs:
     
     - name: Create .env file (using API_KEY)
       run: |
-        echo "X_API=$env:API_KEY" > .env
+        echo "Creating X_API token from GITHUB_ENV"
+        echo "X_API=$GITHUB_ENV:API_KEY" > .env
         echo ".env file created with API_KEY"
 
     - name: Build On Windows
@@ -44,20 +46,25 @@ jobs:
         echo "Building on Windows"
         
         # Set up Chocolatey
+        echo "Setting up Chocolatey"
         Set-ExecutionPolicy AllSigned
         Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
         # Install Inno Setup Command Line Compiler
+        echo "Installing Inno Setup"
         choco install innosetup
 
         # Build .exe
+        echo "Building .exe with pyinstaller"
         pyinstaller build_instructions/EasyPunchCard.spec
 
         # Build Installer
+        echo "Building installer with iscc"
         iscc build_instructions/easypunchcard_setup_script.iss
 
         # Delete all artifacts except the setup exe
-        powershell -Command "Get-ChildItem 'dist' -File | Where-Object { $_.Name -ne 'EasyPunchCard_setup.exe' } | Remove-Item"
+        echo "Deleting artifacts except for installer"
+        powershell -Command "Get-ChildItem 'dist' -File | Where{$_.Name -NotMatch 'EasyPunchCard_setup.exe'} | Remove-Item"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -69,7 +76,7 @@ jobs:
       if: runner.os == 'Windows'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      uses: actions/upload-release-asset@v1
+      uses: softprops/action-gh-release@v2.3.3
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: dist/EasyPunchCard_setup.exe
