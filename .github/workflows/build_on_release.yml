@@ -78,7 +78,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       uses: softprops/action-gh-release@v2.3.3
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: dist/EasyPunchCard_setup.exe
-        asset_name: EasyPunchCard.exe
-        asset_content_type: application/octet-stream
+        files: dist/EasyPunchCard_setup.exe
