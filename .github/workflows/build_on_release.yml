@@ -21,11 +21,6 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Set API key in environment
-      run: |
-        echo "Creating API key variable in GITHUB_ENV"
-        echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
-
     - name: Set PowerShell Execution Policy to Bypass
       run: |
         Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -37,9 +32,9 @@ jobs:
     
     - name: Create .env file (using API_KEY)
       run: |
-        echo "Creating X_API token from GITHUB_ENV"
-        echo "X_API=$GITHUB_ENV:API_KEY" > .env
-        echo ".env file created with API_KEY"
+        echo "Creating X_API key from secrets"
+        echo "X_API=${{ secrets.API_KEY }}" > .env
+      shell: pwsh
 
     - name: Build On Windows
       run: |
@@ -65,7 +60,8 @@ jobs:
         # Delete all artifacts except the setup exe
         echo "Deleting artifacts except for installer"
         powershell -Command "Get-ChildItem 'dist' -File | Where{$_.Name -NotMatch 'EasyPunchCard_setup.exe'} | Remove-Item"
-
+      shell: pwsh
+      
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
