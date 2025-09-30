@@ -59,12 +59,11 @@ jobs:
 
         # Delete all artifacts except the setup exe
         echo "Deleting artifacts except for installer"
-        powershell Get-ChildItem -Path 'dist' -Exclude 'EasyPunchCard_setup.exe' | foreach ($_) {
+        powershell Get-ChildItem -Path ./dist -Exclude 'EasyPunchCard_setup.exe' | foreach ($_) {
           ': Removing ' + $_.fullname
           Remove-Item $_.fullname -Force -Recurse
           ': Removed ' + $_.fullname
         }
-      shell: pwsh
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
