@@ -232,7 +232,24 @@ class SqlAccess:
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         data={"student_id": student_id, "start_time": start_time}
-        requests.delete(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
+        print(data)
+        print("Getting...")
+        r = requests.get(self.link + self.historyEndpoint + f"?student_id={student_id}",
+                         headers={"x-api-key": self.xapikey},
+                         params=data)
+        print("Status code:", r.status_code)
+        print("Response:", r.json())
+        print("\nDeleting...")
+        r = requests.request("DELETE", self.link + self.historyEndpoint + f"?student_id={student_id}",
+                            headers={"x-api-key": self.xapikey, "Content-Type": "application/json"}, data=json.dumps(data))
+        print("Status code:", r.status_code)
+        print("Response:", r.json())
+        print("\nGetting after deleting...")
+        r = requests.get(self.link + self.historyEndpoint + f"?student_id={student_id}",
+                         headers={"x-api-key": self.xapikey},
+                         params=data)
+        print("Status code:", r.status_code)
+        print("Response:", r.json())
 
 
     def admin_update_student_data(self, student_id:str, first_name:str=None, last_name:str=None, graduation_year:int=None):
