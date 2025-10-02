@@ -27,6 +27,7 @@ class SqlAccess:
         """
         self.student_id = student_id
         self.exists = self.user_exists()
+
         if self.exists['user_exists']:
             # check if user exists
             self.admin_status = self.exists["admin_status"]
@@ -40,11 +41,10 @@ class SqlAccess:
         Checks if the user exists in the database using their student id.
 
         Returns:
-            int: 1 if the user exists, 0 otherwise.
+            Dict containing user_exists and admin_status.
         """
         response = requests.get( self.link + self.userexistsEndpoint + f"?student_id={self.student_id}", headers = {"x-api-key": self.xapikey} )
-        jsonValue = json.loads(response.text)
-        return jsonValue
+        return json.loads(response.text)
 
 
     def add_user(self, student_id:str, first_name:str, last_name:str, admin_status:int, graduation_year: int):
@@ -239,11 +239,11 @@ class SqlAccess:
                          params=data)
         print("Status code:", r.status_code)
         print("Response:", r.json())
+
         print("\nDeleting...")
-        r = requests.request("DELETE", self.link + self.historyEndpoint + f"?student_id={student_id}",
-                            headers={"x-api-key": self.xapikey, "Content-Type": "application/json"}, data=json.dumps(data))
-        print("Status code:", r.status_code)
-        print("Response:", r.json())
+        requests.request("DELETE", self.link + self.historyEndpoint + f"?student_id={student_id}",
+                        headers={"x-api-key": self.xapikey}, json=data)
+
         print("\nGetting after deleting...")
         r = requests.get(self.link + self.historyEndpoint + f"?student_id={student_id}",
                          headers={"x-api-key": self.xapikey},
