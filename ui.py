@@ -856,9 +856,13 @@ class GUI:
         submit_button = tk.Button(
             self.add_clock_frame,
             text="Submit Time",
+            # Add clock time on a specific date. Add 12 hours if it's PM.
             command=lambda: self.submitting_clock_time(
-                cal.get_date(), f"{clock_in_hour.get() + 12 if clock_in_dropdown.get().upper() == "PM" else 0}:{clock_in_minute.get()}",
-                f"{clock_out_hour.get()  + 12 if clock_out_dropdown.get().upper() == "PM" else 0}:{clock_out_minute.get()}"),
+                cal.get_date(),
+                f"{str(int(clock_in_hour.get()) + 
+                       (12 if clock_in_dropdown.get().upper() == "PM" else 0))}:{clock_in_minute.get()}",
+                f"{str(int(clock_out_hour.get())  + 
+                       (12 if clock_out_dropdown.get().upper() == "PM" else 0))}:{clock_out_minute.get()}"),
             bg="#32CD32",
             fg="white", font=("Roboto", 20, "bold"),
             relief="flat", bd=0

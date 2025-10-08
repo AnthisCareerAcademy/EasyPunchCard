@@ -27,6 +27,7 @@ class SqlAccess:
         """
         self.student_id = student_id
         self.exists = self.user_exists()
+
         if self.exists['user_exists']:
             # check if user exists
             self.admin_status = self.exists["admin_status"]
@@ -40,11 +41,10 @@ class SqlAccess:
         Checks if the user exists in the database using their student id.
 
         Returns:
-            int: 1 if the user exists, 0 otherwise.
+            Dict containing user_exists and admin_status.
         """
         response = requests.get( self.link + self.userexistsEndpoint + f"?student_id={self.student_id}", headers = {"x-api-key": self.xapikey} )
-        jsonValue = json.loads(response.text)
-        return jsonValue
+        return json.loads(response.text)
 
 
     def add_user(self, student_id:str, first_name:str, last_name:str, admin_status:int, graduation_year: int):
@@ -218,7 +218,7 @@ class SqlAccess:
             raise ValueError("Error: user doesn't have admin status")
         
         data={"student_id": student_id, "start_time": start_time, "end_time": end_time}
-        requests.post(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
+        requests.post(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
 
     def admin_delete_historical_data(self, student_id:str, start_time:str):
@@ -232,7 +232,9 @@ class SqlAccess:
         if self.admin_status == 0:
             raise ValueError("Error: user doesn't have admin status")
         data={"student_id": student_id, "start_time": start_time}
-        requests.delete(self.link + self.historyEndpoint + f"?student_id={student_id}", headers={"x-api-key": self.xapikey}, json=data)
+
+        requests.delete(self.link + self.historyEndpoint + f"?student_id={student_id}",
+                        headers={"x-api-key": self.xapikey}, json=data)
 
 
     def admin_update_student_data(self, student_id:str, first_name:str=None, last_name:str=None, graduation_year:int=None):
