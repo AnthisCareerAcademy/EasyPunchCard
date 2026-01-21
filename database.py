@@ -1,3 +1,4 @@
+import datetime as dt
 import pandas as pd
 import requests, json
 import os
@@ -253,8 +254,37 @@ class SqlAccess:
         data = {"student_id": student_id, "first_name": first_name, "last_name": last_name, "graduation_year": graduation_year}
         requests.put(self.link + self.userEndpoint, headers={"x-api-key": self.xapikey}, json=data)
 
+    def admin_update_student_time(self, student_id:str, minutes:int=None):
+        """
+        Directly set the number of minutes a student has.
 
-    def database_to_excel(self, file_name:str="EasyPunchCard"):
+        Args:
+            student_id: student's id
+            minutes: how many minutes the student has
+
+        Raises:
+            ValueError: If the user retrieving the data doesn't have admin status
+        """
+        if self.admin_status == 0:
+            raise ValueError("Error: user doesn't have admin status")
+
+        # Delete all previous time.
+        get = requests.get(self.link + self.historyEndpoint + f"?student_id={student_id}",
+            headers={"x-api-key": self.xapikey}, json={"student_id": student_id})
+
+        for r in json.loads(get.text):
+            requests.delete(self.link + self.historyEndpoint + f"?student_id={student_id}",
+                headers={"x-api-key": self.xapikey}, json={"student_id": student_id, "start_time": r["start_time"]})
+
+        # Start on Jan 1, 1900, and add the requested number of minutes, then post to the user's history.
+        start = dt.datetime(1900, 1, 1, 0, 0, 0)
+        end = start + dt.timedelta(minutes=minutes)
+        f = "%m/%d/%Y %H:%M:%S"
+
+        data = {"student_id": student_id, "start_time": start.strftime(f), "end_time": end.strftime(f)}
+        requests.post(self.link + self.historyEndpoint, headers={"x-api-key": self.xapikey}, json=data)
+
+def database_to_excel(self, file_name:str="EasyPunchCard"):
         """
         Export the records from the database to an Excel file.
 

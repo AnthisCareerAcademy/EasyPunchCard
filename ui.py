@@ -43,6 +43,7 @@ class GUI:
         self.add_clock_frame = ttk.Frame(self.root)
         self.delete_clock_frame = ttk.Frame(self.root)
         self.edit_student_info_frame = ttk.Frame(self.root)
+        self.edit_student_time_frame = ttk.Frame(self.root)
 
         # Admin Windows
         self.select_student_frame: None | ttk.Frame = None
@@ -63,6 +64,7 @@ class GUI:
             "add_clock_frame": self.add_clock_frame,
             "delete_clock_frame": self.delete_clock_frame,
             "edit_student_info_frame": self.edit_student_info_frame,
+            "edit_student_time_frame": self.edit_student_time_frame,
         }
 
         # Start The Program with the log in screen
@@ -782,6 +784,17 @@ class GUI:
         )
         edit_student_info.pack(pady=10)
 
+        edit_student_time = tk.Button(
+            self.update_frame,
+            text="Edit Student Time",
+            command=lambda: self.show(self.edit_student_time_frame, "edit_student_time_frame",
+                                      self.create_edit_student_time_screen),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0
+        )
+        edit_student_time.pack(pady=10)
+
         # Back button
         back_button = tk.Button(
             self.update_frame,
@@ -979,6 +992,53 @@ class GUI:
         )
         back_button.grid(row=6, column=1)
 
+    def create_edit_student_time_screen(self):
+        self.edit_student_time_frame.columnconfigure(0, weight=1)
+        self.edit_student_time_frame.columnconfigure(1, weight=1)
+        title = ttk.Label(
+            self.edit_student_time_frame, text="Update Student Time", font=("Roboto", 36, 'underline')
+        )
+        title.grid(row=0, column=0, columnspan=2, pady=20)
+
+        warning = ttk.Label(
+            self.edit_student_time_frame, text="Warning! This will delete ALL CLOCK HISTORY!", font=("Roboto", 14, "bold")
+        )
+        warning.grid(row=1, column=0, columnspan=2, pady=20)
+
+        minutes = ttk.Entry(
+            self.edit_student_time_frame,
+            font=("Roboto", 20)
+        )
+        minutes.grid(row=3, column=0, columnspan=2)
+        minutes_title = ttk.Label(
+            self.edit_student_time_frame, text="Student Time (in minutes)", font=("Roboto", 20)
+        )
+        minutes_title.grid(row=2, column=0, columnspan=2, pady=15)
+
+        message_text = ttk.Label(
+            self.edit_student_time_frame, text="(Leave blank if no change)", font=("Roboto", 14)
+        )
+        message_text.grid(row=5, column=0, columnspan=2, pady=10)
+
+        submit_button = tk.Button(
+            self.edit_student_time_frame,
+            text="Submit",
+            command=lambda: self.edit_student_time(minutes.get()),
+            bg="#00796B",
+            fg="white", font=("Roboto", 28, "bold"),
+            relief="flat", bd=0)
+        submit_button.grid(row=6, column=0, columnspan=2)
+
+        back_button = tk.Button(
+            self.edit_student_time_frame,
+            text="Back",
+            command=lambda: self.show(self.update_frame, "update_frame", self.create_update_screen),
+            bg="#8B0000",
+            fg="white", font=("Roboto", 16, "bold"),
+            relief="flat", bd=0
+        )
+        back_button.grid(row=7, column=1)
+
     def submitting_clock_time(self, date, clock_in, clock_out):
         date_obj = datetime.strptime(date, "%m/%d/%y")
         formated_date = date_obj.strftime("%B %d, %Y")
@@ -1001,6 +1061,16 @@ class GUI:
 
         self.current_user.access.admin_update_student_data(self.current_student_id, fname, lname, grad_year)
         self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
+    def edit_student_time(self, minutes):
+       try:
+           minutes = int(minutes)
+       except ValueError:
+           minutes = None
+
+       self.current_user.access.admin_update_student_time(self.current_student_id, minutes)
+       self.show(self.admin_frame, "admin_frame", self.create_admin_panel_screen)
+
 
     # Complementary Methods -----------------------------------------------
     def show(self, frame: ttk.Frame, name: str, frame_builder):
